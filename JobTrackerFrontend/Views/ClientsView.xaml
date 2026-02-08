@@ -1,0 +1,68 @@
+<UserControl x:Class="JobTrackerFrontend.Views.ClientsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+             d:DataContext="{d:DesignInstance vm:ClientsViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Loaded="OnLoaded">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Right"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Content="Deactivate"
+                        Command="{Binding DeactivateClientCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Edit"
+                        Command="{Binding EditClientCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="New Client"
+                        Command="{Binding NewClientCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Client List -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Clients}"
+                  SelectedItem="{Binding SelectedClient}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  SelectionMode="Single"
+                  Style="{StaticResource MaterialDesignDataGrid}"
+                  AlternationCount="2"
+                  AlternatingRowBackground="#08000000"
+                  MouseDoubleClick="OnRowDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" />
+                <DataGridTextColumn Header="City" Binding="{Binding City}" Width="120" />
+                <DataGridTextColumn Header="State" Binding="{Binding State}" Width="60" />
+                <DataGridTextColumn Header="Jobs" Binding="{Binding JobCount}" Width="60" />
+                <DataGridTextColumn Header="Contacts" Binding="{Binding ContactCount}" Width="80" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0" Grid.RowSpan="2"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     VerticalAlignment="Top" />
+    </Grid>
+</UserControl>

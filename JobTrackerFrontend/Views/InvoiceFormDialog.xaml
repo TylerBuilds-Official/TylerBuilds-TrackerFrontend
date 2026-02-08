@@ -1,0 +1,103 @@
+<Window x:Class="JobTrackerFrontend.Views.InvoiceFormDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+        d:DataContext="{d:DesignInstance vm:InvoiceFormViewModel}"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Width="500" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{md:MaterialDesignFont}"
+        Loaded="OnLoaded">
+
+    <StackPanel Margin="24">
+        <!-- Job -->
+        <ComboBox ItemsSource="{Binding Jobs}"
+                  SelectedItem="{Binding SelectedJob}"
+                  md:HintAssist.Hint="Job *"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  Margin="0,0,0,16">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <Run Text="{Binding Title}" />
+                        <Run Text=" — " />
+                        <Run Text="{Binding ClientName}" />
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <!-- Amount -->
+        <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                 md:HintAssist.Hint="Amount *"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 Margin="0,0,0,16" />
+
+        <!-- Date Row -->
+        <Grid Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <DatePicker Grid.Column="0"
+                        SelectedDate="{Binding IssuedDate}"
+                        md:HintAssist.Hint="Issued Date"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                        Margin="0,0,8,0" />
+
+            <DatePicker Grid.Column="1"
+                        SelectedDate="{Binding DueDate}"
+                        md:HintAssist.Hint="Due Date"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                        Margin="8,0,0,0" />
+        </Grid>
+
+        <!-- Status (edit mode only) -->
+        <ComboBox ItemsSource="{Binding Statuses}"
+                  SelectedItem="{Binding SelectedStatus}"
+                  md:HintAssist.Hint="Status"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  Visibility="{Binding IsEdit, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  Margin="0,0,0,16" />
+
+        <!-- Notes -->
+        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                 md:HintAssist.Hint="Notes"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 MinHeight="60"
+                 MaxHeight="120"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,16" />
+
+        <!-- Error Message -->
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"
+                   Margin="0,0,0,12"
+                   TextWrapping="Wrap" />
+
+        <!-- Buttons -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Margin="0,0,12,0" />
+            <Button Content="Save"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBooleanConverter}}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

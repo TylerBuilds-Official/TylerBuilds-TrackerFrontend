@@ -1,0 +1,269 @@
+<Window x:Class="JobTrackerFrontend.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+        d:DataContext="{d:DesignInstance vm:MainWindowViewModel}"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="TylerBuilds | JobTracker"
+        Height="800" Width="1280"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{md:MaterialDesignFont}">
+
+    <Window.Resources>
+        <QuadraticEase x:Key="SidebarEase" EasingMode="EaseOut" />
+    </Window.Resources>
+
+    <Grid>
+        <!-- Login Screen (shown when not authenticated) -->
+        <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource InverseBoolToVisConverter}}"
+              Panel.ZIndex="10"
+              Background="{DynamicResource MaterialDesignPaper}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <md:PackIcon Kind="ShieldAccount"
+                             Width="64" Height="64"
+                             HorizontalAlignment="Center"
+                             Margin="0,0,0,24"
+                             Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <TextBlock Text="TylerBuilds | JobTracker"
+                           Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8" />
+                <TextBlock Text="Sign in with your TylerBuilds account to continue"
+                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                           HorizontalAlignment="Center"
+                           Opacity="0.6"
+                           Margin="0,0,0,32" />
+                <CheckBox Content="Stay signed in"
+                          IsChecked="{Binding StaySignedIn}"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,16"
+                          Style="{StaticResource MaterialDesignCheckBox}" />
+                <Button Content="Sign In"
+                        Command="{Binding LoginCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Width="200" Height="40"
+                        HorizontalAlignment="Center"
+                        FontSize="14" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Main App Shell (shown when authenticated) -->
+        <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar -->
+            <Border x:Name="SidebarBorder"
+                    Grid.Column="0"
+                    Background="{DynamicResource PrimaryHueDarkBrush}"
+                    Width="220">
+                <DockPanel>
+                    <!-- Top: Menu Toggle -->
+                    <Button DockPanel.Dock="Top"
+                            Command="{Binding ToggleNavCommand}"
+                            Style="{StaticResource MaterialDesignIconForegroundButton}"
+                            Foreground="White"
+                            HorizontalAlignment="Left"
+                            Margin="12,12,0,12">
+                        <md:PackIcon Kind="Menu" Width="24" Height="24" />
+                    </Button>
+
+                    <!-- Bottom: User + Logout -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
+                        <Separator Background="#33FFFFFF" Margin="12,0" />
+                        <Button Command="{Binding LogoutCommand}"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                Foreground="#AAFFFFFF"
+                                HorizontalAlignment="Left"
+                                Margin="8,8,0,0"
+                                ToolTip="Sign Out">
+                            <StackPanel Orientation="Horizontal">
+                                <md:PackIcon Kind="Logout" Width="24" Height="24" Margin="4,0,12,0" />
+                                <TextBlock Text="Sign Out"
+                                           VerticalAlignment="Center"
+                                           Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Nav Items -->
+                    <StackPanel Margin="0,8,0,0">
+                        <!-- Dashboard -->
+                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Dashboard" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Dashboard" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Dashboard"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Foreground="White"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="4,8"
+                                    ToolTip="Dashboard">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="ViewDashboard" Width="24" Height="24" Margin="4,0,12,0" />
+                                    <TextBlock Text="Dashboard"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+
+                        <!-- Clients -->
+                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Clients" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Clients" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Clients"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Foreground="White"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="4,8"
+                                    ToolTip="Clients">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="AccountGroup" Width="24" Height="24" Margin="4,0,12,0" />
+                                    <TextBlock Text="Clients"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+
+                        <!-- Jobs -->
+                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Jobs" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Jobs" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Jobs"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Foreground="White"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="4,8"
+                                    ToolTip="Jobs">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="Briefcase" Width="24" Height="24" Margin="4,0,12,0" />
+                                    <TextBlock Text="Jobs"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+
+                        <!-- Invoices -->
+                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Invoices" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Invoices" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Invoices"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Foreground="White"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="4,8"
+                                    ToolTip="Invoices">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="Receipt" Width="24" Height="24" Margin="4,0,12,0" />
+                                    <TextBlock Text="Invoices"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Content Area -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Top Bar -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource MaterialDesignToolBarBackground}"
+                        Padding="16,10">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="2" Direction="270"
+                                          BlurRadius="6" Opacity="0.15"
+                                          Color="Black" />
+                    </Border.Effect>
+                    <DockPanel>
+                        <TextBlock Text="{Binding SelectedNavItem}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   VerticalAlignment="Center" />
+                        <StackPanel DockPanel.Dock="Right"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <md:PackIcon Kind="Account"
+                                         Width="20" Height="20"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         Opacity="0.6" />
+                            <TextBlock Text="{Binding UserName}"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Dynamic Content -->
+                <ContentControl Grid.Row="1"
+                                Content="{Binding Navigation.CurrentView}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

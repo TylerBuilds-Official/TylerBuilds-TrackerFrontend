@@ -1,0 +1,29 @@
+<Application x:Class="JobTrackerFrontend.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:JobTrackerFrontend.Converters">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- MaterialDesign Theme -->
+                <md:BundledTheme BaseTheme="Light" PrimaryColor="BlueGrey" SecondaryColor="Teal" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisConverter" />
+            <converters:NavWidthConverter x:Key="NavWidthConverter" />
+            <converters:EntityTypeToIconConverter x:Key="EntityTypeToIconConverter" />
+            <converters:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
+            <converters:ActiveNavBrushConverter x:Key="ActiveNavBrushConverter" />
+            <converters:ActiveNavBorderConverter x:Key="ActiveNavBorderConverter" />
+            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+            <converters:StatusToForegroundConverter x:Key="StatusToForegroundConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

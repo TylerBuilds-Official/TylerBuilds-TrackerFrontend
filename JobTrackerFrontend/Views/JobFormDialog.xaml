@@ -1,0 +1,163 @@
+<Window x:Class="JobTrackerFrontend.Views.JobFormDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+        d:DataContext="{d:DesignInstance vm:JobFormViewModel}"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Width="600" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{md:MaterialDesignFont}"
+        Loaded="OnLoaded">
+
+    <StackPanel Margin="24">
+        <!-- Client -->
+        <ComboBox ItemsSource="{Binding Clients}"
+                  SelectedItem="{Binding SelectedClient}"
+                  DisplayMemberPath="Name"
+                  md:HintAssist.Hint="Client *"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  Margin="0,0,0,16" />
+
+        <!-- Contact -->
+        <ComboBox ItemsSource="{Binding Contacts}"
+                  SelectedItem="{Binding SelectedContact}"
+                  md:HintAssist.Hint="Primary Contact"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}"
+                  Margin="0,0,0,16">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <Run Text="{Binding FirstName}" />
+                        <Run Text=" " />
+                        <Run Text="{Binding LastName}" />
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <!-- Title -->
+        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                 md:HintAssist.Hint="Job Title *"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 Margin="0,0,0,16" />
+
+        <!-- Description -->
+        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                 md:HintAssist.Hint="Description"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 MinHeight="60"
+                 MaxHeight="120"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,16" />
+
+        <!-- Status (create mode only) -->
+        <ComboBox ItemsSource="{Binding Statuses}"
+                  SelectedItem="{Binding Status}"
+                  md:HintAssist.Hint="Status"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  Visibility="{Binding IsEdit, Converter={StaticResource InverseBoolToVisConverter}}"
+                  Margin="0,0,0,16" />
+
+        <!-- Billing Type -->
+        <ComboBox ItemsSource="{Binding BillingTypes}"
+                  SelectedItem="{Binding BillingType}"
+                  md:HintAssist.Hint="Billing Type"
+                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                  Margin="0,0,0,16" />
+
+        <!-- Money Fields Row -->
+        <Grid Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0"
+                     Text="{Binding HourlyRate, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                     md:HintAssist.Hint="Hourly Rate"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Margin="0,0,8,0" />
+
+            <TextBox Grid.Column="1"
+                     Text="{Binding FixedPrice, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                     md:HintAssist.Hint="Fixed Price"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Margin="4,0" />
+
+            <TextBox Grid.Column="2"
+                     Text="{Binding RetainerAmount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                     md:HintAssist.Hint="Retainer Amount"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Margin="8,0,0,0" />
+        </Grid>
+
+        <!-- Estimated Value -->
+        <TextBox Text="{Binding EstimatedValue, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                 md:HintAssist.Hint="Estimated Value"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 Margin="0,0,0,16" />
+
+        <!-- Date Row -->
+        <Grid Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <DatePicker Grid.Column="0"
+                        SelectedDate="{Binding StartDate}"
+                        md:HintAssist.Hint="Start Date"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                        Margin="0,0,8,0" />
+
+            <DatePicker Grid.Column="1"
+                        SelectedDate="{Binding EndDate}"
+                        md:HintAssist.Hint="End Date"
+                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                        Margin="8,0,0,0" />
+        </Grid>
+
+        <!-- Notes -->
+        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                 md:HintAssist.Hint="Notes"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 MinHeight="60"
+                 MaxHeight="120"
+                 VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,16" />
+
+        <!-- Error Message -->
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"
+                   Margin="0,0,0,12"
+                   TextWrapping="Wrap" />
+
+        <!-- Buttons -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Margin="0,0,12,0" />
+            <Button Content="Save"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBooleanConverter}}" />
+        </StackPanel>
+    </StackPanel>
+</Window>
