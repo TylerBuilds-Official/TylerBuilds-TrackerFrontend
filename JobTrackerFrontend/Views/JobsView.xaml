@@ -12,81 +12,249 @@
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Right"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <Button Content="Edit"
-                        Command="{Binding EditJobCommand}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="0,0,12,0"
-                        IsEnabled="{Binding SelectedJob, Converter={StaticResource NotNullToBoolConverter}}" />
-                <Button Content="New Job"
-                        Command="{Binding NewJobCommand}"
-                        Style="{StaticResource MaterialDesignRaisedButton}" />
-            </StackPanel>
-        </DockPanel>
-
-        <!-- Status Filter -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-            <ComboBox Width="160"
-                      md:HintAssist.Hint="Filter by status"
-                      SelectedItem="{Binding StatusFilter}"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
-                <ComboBoxItem Content="" />
-                <ComboBoxItem Content="Lead" />
-                <ComboBoxItem Content="Proposal" />
-                <ComboBoxItem Content="Active" />
-                <ComboBoxItem Content="Completed" />
-                <ComboBoxItem Content="Invoiced" />
-            </ComboBox>
-        </StackPanel>
-
-        <!-- Job List -->
-        <DataGrid Grid.Row="2"
-                  ItemsSource="{Binding Jobs}"
-                  SelectedItem="{Binding SelectedJob}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  SelectionMode="Single"
-                  Style="{StaticResource MaterialDesignDataGrid}"
-                  AlternationCount="2"
-                  AlternatingRowBackground="#08000000"
-                  MouseDoubleClick="OnRowDoubleClick">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*" />
-                <DataGridTextColumn Header="Client" Binding="{Binding ClientName}" Width="160" />
-                <DataGridTemplateColumn Header="Status" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border CornerRadius="8"
-                                    Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
-                                    Padding="8,2" Margin="0,2"
-                                    HorizontalAlignment="Left">
-                                <TextBlock Text="{Binding Status}"
-                                           Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
-                                           FontSize="11" FontWeight="Medium" />
-                            </Border>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Billing" Binding="{Binding BillingType}" Width="80" />
-                <DataGridTextColumn Header="Est. Value" Binding="{Binding EstimatedValue, StringFormat=C}" Width="100" />
-                <DataGridTextColumn Header="Paid" Binding="{Binding TotalPaid, StringFormat=C}" Width="100" />
-            </DataGrid.Columns>
-        </DataGrid>
-
         <!-- Loading -->
-        <ProgressBar Grid.Row="0" Grid.RowSpan="3"
+        <ProgressBar Grid.Row="0"
                      Style="{StaticResource MaterialDesignLinearProgressBar}"
                      IsIndeterminate="True"
                      Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     VerticalAlignment="Top" />
+                     Height="2"
+                     Margin="0,0,0,4"
+                     Background="Transparent"
+                     BorderThickness="0" />
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- LIST MODE                                       -->
+        <!-- ════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding IsDetailMode, Converter={StaticResource InverseBoolToVisConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="Edit"
+                            Command="{Binding EditJobCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,12,0"
+                            IsEnabled="{Binding SelectedJob, Converter={StaticResource NotNullToBoolConverter}}" />
+                    <Button Content="New Job"
+                            Command="{Binding NewJobCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}" />
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Status Filter -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                <ComboBox Width="160"
+                          md:HintAssist.Hint="Filter by status"
+                          SelectedItem="{Binding StatusFilter}"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Padding="8,4" FontSize="13">
+                    <ComboBoxItem Content="" />
+                    <ComboBoxItem Content="Lead" />
+                    <ComboBoxItem Content="Proposal" />
+                    <ComboBoxItem Content="Active" />
+                    <ComboBoxItem Content="Completed" />
+                    <ComboBoxItem Content="Invoiced" />
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Job List -->
+            <DataGrid Grid.Row="2"
+                      ItemsSource="{Binding Jobs}"
+                      SelectedItem="{Binding SelectedJob}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      SelectionMode="Single"
+                      AlternationCount="2"
+                      AlternatingRowBackground="#0A455A64"
+                      MouseDoubleClick="OnRowDoubleClick">
+                <DataGrid.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Header="Set Status">
+                            <MenuItem Header="Lead" Command="{Binding SetStatusCommand}" CommandParameter="Lead" />
+                            <MenuItem Header="Proposal" Command="{Binding SetStatusCommand}" CommandParameter="Proposal" />
+                            <MenuItem Header="Active" Command="{Binding SetStatusCommand}" CommandParameter="Active" />
+                            <MenuItem Header="Completed" Command="{Binding SetStatusCommand}" CommandParameter="Completed" />
+                            <MenuItem Header="Invoiced" Command="{Binding SetStatusCommand}" CommandParameter="Invoiced" />
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Edit" Command="{Binding EditJobCommand}" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2.5*" />
+                    <DataGridTextColumn Header="Client" Binding="{Binding ClientName}" Width="2*" />
+                    <DataGridTemplateColumn Header="Status" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="8"
+                                        Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                                        Padding="8,2" Margin="0,2"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Status}"
+                                               Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                               FontSize="11" FontWeight="Medium" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Billing" Binding="{Binding BillingType}" Width="*" />
+                    <DataGridTextColumn Header="Est. Value" Binding="{Binding EstimatedValue, StringFormat=C}" Width="*" />
+                    <DataGridTextColumn Header="Paid" Binding="{Binding TotalPaid, StringFormat=C}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- DETAIL MODE                                     -->
+        <!-- ════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding IsDetailMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Back + Job Header -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                <Button DockPanel.Dock="Left"
+                        Command="{Binding BackToListCommand}"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Padding="4,6" MinWidth="0"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="ArrowLeft" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="Jobs" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Edit"
+                            Command="{Binding EditJobCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" />
+                </StackPanel>
+
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding DetailJob.Title}"
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0" />
+            </DockPanel>
+
+            <!-- Job Info Cards -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <md:Card Grid.Column="0" Padding="16" Margin="0,0,6,0">
+                    <StackPanel>
+                        <TextBlock Text="Client" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.ClientName}" FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock Text="Status" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <Border CornerRadius="8"
+                                Background="{Binding DetailJob.Status, Converter={StaticResource StatusToBrushConverter}}"
+                                Padding="8,2" HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding DetailJob.Status}"
+                                       Foreground="{Binding DetailJob.Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                       FontSize="11" FontWeight="Medium" />
+                        </Border>
+                    </StackPanel>
+                </md:Card>
+
+                <md:Card Grid.Column="1" Padding="16" Margin="6,0">
+                    <StackPanel>
+                        <TextBlock Text="Billing" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.BillingType, TargetNullValue=—}" FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock Text="Est. Value" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.EstimatedValue, StringFormat=C, TargetNullValue=—}" FontSize="14" />
+                    </StackPanel>
+                </md:Card>
+
+                <md:Card Grid.Column="2" Padding="16" Margin="6,0">
+                    <StackPanel>
+                        <TextBlock Text="Start Date" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.StartDate, StringFormat=d, TargetNullValue=—}" FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock Text="End Date" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.EndDate, StringFormat=d, TargetNullValue=—}" FontSize="14" />
+                    </StackPanel>
+                </md:Card>
+
+                <md:Card Grid.Column="3" Padding="16" Margin="6,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Total Paid" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.TotalPaid, StringFormat=C, TargetNullValue=$0.00}" FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock Text="Invoices" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailJob.InvoiceCount, TargetNullValue=0}" FontSize="14" />
+                    </StackPanel>
+                </md:Card>
+            </Grid>
+
+            <!-- Description / Notes -->
+            <md:Card Grid.Row="2" Padding="16" Margin="0,0,0,16"
+                     Visibility="{Binding DetailJob.Notes, Converter={StaticResource NullToCollapsedConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Notes" Opacity="0.6" FontSize="11" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding DetailJob.Notes}" TextWrapping="Wrap" FontSize="14" />
+                </StackPanel>
+            </md:Card>
+
+            <!-- Invoices for this Job -->
+            <Grid Grid.Row="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Invoices"
+                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                           Margin="0,0,0,8" />
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding JobInvoices}"
+                          SelectedItem="{Binding SelectedJobInvoice}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
+                        <DataGridTemplateColumn Header="Status" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8"
+                                            Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                                            Padding="8,2" Margin="0,2"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Status}"
+                                                   Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                                   FontSize="11" FontWeight="Medium" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                        <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
+                        <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+
     </Grid>
 </UserControl>

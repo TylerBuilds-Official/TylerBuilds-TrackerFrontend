@@ -18,6 +18,8 @@ public partial class InvoicesViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
 
+    public List<string> Statuses { get; } = ["Draft", "Sent", "Paid", "Overdue", "Cancelled"];
+
     public InvoicesViewModel(ApiClient apiClient)
     {
         _apiClient = apiClient;
@@ -44,6 +46,24 @@ public partial class InvoicesViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SetStatusAsync(string status)
+    {
+        if (SelectedInvoice is null) return;
+
+        try
+        {
+            var request = new UpdateInvoiceStatusRequest { Status = status };
+            await _apiClient.PatchAsync<UpdateInvoiceStatusRequest, InvoiceModel>(
+                $"/invoices/{SelectedInvoice.Id}/status", request);
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to update status: {ex.Message}", "Error");
         }
     }
 

@@ -19,10 +19,97 @@
 
     <Window.Resources>
         <QuadraticEase x:Key="SidebarEase" EasingMode="EaseOut" />
+
+        <!-- Sidebar: theme-aware -->
+        <Style x:Key="SidebarBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#F0F2F5" />
+            <Setter Property="BorderBrush" Value="#E0E0E0" />
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Background" Value="#151D21" />
+                    <Setter Property="BorderBrush" Value="#1E2A2F" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NavButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Foreground" Value="#546E7A" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Height" Value="36" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Foreground" Value="#B0BEC5" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NavMenuButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Foreground" Value="#546E7A" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="8,6" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Foreground" Value="#B0BEC5" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NavSignOutButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Foreground" Value="#78909C" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="8,8" />
+            <Setter Property="Margin" Value="8,8,8,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Foreground" Value="#80FFFFFF" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NavSeparatorStyle" TargetType="Separator">
+            <Setter Property="Background" Value="#E0E0E0" />
+            <Setter Property="Margin" Value="12,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                    <Setter Property="Background" Value="#33FFFFFF" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
-        <!-- Login Screen (shown when not authenticated) -->
+        <!-- Startup Splash (shown while checking for previous session) -->
+        <Grid Visibility="{Binding IsCheckingAuth, Converter={StaticResource BooleanToVisibilityConverter}}"
+              Panel.ZIndex="20"
+              Background="{DynamicResource MaterialDesignPaper}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <md:PackIcon Kind="ShieldAccount"
+                             Width="64" Height="64"
+                             HorizontalAlignment="Center"
+                             Margin="0,0,0,24"
+                             Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <TextBlock Text="TylerBuilds | JobTracker"
+                           Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8" />
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                             IsIndeterminate="True"
+                             Width="28" Height="28"
+                             HorizontalAlignment="Center"
+                             Margin="0,24,0,12" />
+                <TextBlock Text="{Binding AuthStatusMessage}"
+                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                           HorizontalAlignment="Center"
+                           Opacity="0.6" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Login Screen (shown when not authenticated and not checking) -->
         <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource InverseBoolToVisConverter}}"
               Panel.ZIndex="10"
               Background="{DynamicResource MaterialDesignPaper}">
@@ -65,32 +152,29 @@
             <!-- Sidebar -->
             <Border x:Name="SidebarBorder"
                     Grid.Column="0"
-                    Background="{DynamicResource PrimaryHueDarkBrush}"
+                    Style="{StaticResource SidebarBorderStyle}"
                     Width="220">
                 <DockPanel>
                     <!-- Top: Menu Toggle -->
                     <Button DockPanel.Dock="Top"
                             Command="{Binding ToggleNavCommand}"
-                            Style="{StaticResource MaterialDesignIconForegroundButton}"
-                            Foreground="White"
+                            Style="{StaticResource NavMenuButtonStyle}"
                             HorizontalAlignment="Left"
-                            Margin="12,12,0,12">
-                        <md:PackIcon Kind="Menu" Width="24" Height="24" />
+                            Margin="8,10,0,10">
+                        <md:PackIcon Kind="Menu" Width="20" Height="20" />
                     </Button>
 
                     <!-- Bottom: User + Logout -->
                     <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
-                        <Separator Background="#33FFFFFF" Margin="12,0" />
+                        <Separator Style="{StaticResource NavSeparatorStyle}" />
                         <Button Command="{Binding LogoutCommand}"
-                                Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                Foreground="#AAFFFFFF"
-                                HorizontalAlignment="Left"
-                                Margin="8,8,0,0"
+                                Style="{StaticResource NavSignOutButtonStyle}"
                                 ToolTip="Sign Out">
-                            <StackPanel Orientation="Horizontal">
-                                <md:PackIcon Kind="Logout" Width="24" Height="24" Margin="4,0,12,0" />
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <md:PackIcon Kind="Logout" Width="18" Height="18" Margin="4,0,10,0" VerticalAlignment="Center" />
                                 <TextBlock Text="Sign Out"
                                            VerticalAlignment="Center"
+                                           FontSize="13"
                                            Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </StackPanel>
                         </Button>
@@ -99,7 +183,7 @@
                     <!-- Nav Items -->
                     <StackPanel Margin="0,8,0,0">
                         <!-- Dashboard -->
-                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
                             <Border.Background>
                                 <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
                                     <Binding Source="Dashboard" />
@@ -114,14 +198,10 @@
                             </Border.BorderBrush>
                             <Button Command="{Binding NavigateToCommand}"
                                     CommandParameter="Dashboard"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    Foreground="White"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Left"
-                                    Padding="4,8"
+                                    Style="{StaticResource NavButtonStyle}"
                                     ToolTip="Dashboard">
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="ViewDashboard" Width="24" Height="24" Margin="4,0,12,0" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="ViewDashboard" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
                                     <TextBlock Text="Dashboard"
                                                VerticalAlignment="Center"
                                                Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -130,7 +210,7 @@
                         </Border>
 
                         <!-- Clients -->
-                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
                             <Border.Background>
                                 <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
                                     <Binding Source="Clients" />
@@ -145,14 +225,10 @@
                             </Border.BorderBrush>
                             <Button Command="{Binding NavigateToCommand}"
                                     CommandParameter="Clients"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    Foreground="White"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Left"
-                                    Padding="4,8"
+                                    Style="{StaticResource NavButtonStyle}"
                                     ToolTip="Clients">
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="AccountGroup" Width="24" Height="24" Margin="4,0,12,0" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="AccountGroup" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
                                     <TextBlock Text="Clients"
                                                VerticalAlignment="Center"
                                                Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -161,7 +237,7 @@
                         </Border>
 
                         <!-- Jobs -->
-                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
                             <Border.Background>
                                 <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
                                     <Binding Source="Jobs" />
@@ -176,14 +252,10 @@
                             </Border.BorderBrush>
                             <Button Command="{Binding NavigateToCommand}"
                                     CommandParameter="Jobs"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    Foreground="White"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Left"
-                                    Padding="4,8"
+                                    Style="{StaticResource NavButtonStyle}"
                                     ToolTip="Jobs">
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Briefcase" Width="24" Height="24" Margin="4,0,12,0" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="Briefcase" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
                                     <TextBlock Text="Jobs"
                                                VerticalAlignment="Center"
                                                Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -192,7 +264,7 @@
                         </Border>
 
                         <!-- Invoices -->
-                        <Border CornerRadius="4" Margin="8,2" BorderThickness="3,0,0,0">
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
                             <Border.Background>
                                 <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
                                     <Binding Source="Invoices" />
@@ -207,14 +279,10 @@
                             </Border.BorderBrush>
                             <Button Command="{Binding NavigateToCommand}"
                                     CommandParameter="Invoices"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    Foreground="White"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Left"
-                                    Padding="4,8"
+                                    Style="{StaticResource NavButtonStyle}"
                                     ToolTip="Invoices">
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Receipt" Width="24" Height="24" Margin="4,0,12,0" />
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="FileDocumentOutline" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
                                     <TextBlock Text="Invoices"
                                                VerticalAlignment="Center"
                                                Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -226,7 +294,7 @@
             </Border>
 
             <!-- Content Area -->
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" ClipToBounds="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -234,8 +302,19 @@
 
                 <!-- Top Bar -->
                 <Border Grid.Row="0"
-                        Background="{DynamicResource MaterialDesignToolBarBackground}"
-                        Padding="16,10">
+                        Padding="16,10"
+                        Margin="24,0,24,0"
+                        CornerRadius="0,0,4,4">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#F0F2F5" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                    <Setter Property="Background" Value="#253238" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="2" Direction="270"
                                           BlurRadius="6" Opacity="0.15"
@@ -248,6 +327,23 @@
                         <StackPanel DockPanel.Dock="Right"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right">
+                                <Button Command="{Binding ToggleDarkModeCommand}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    ToolTip="Toggle Dark Mode"
+                                    Margin="0,0,16,0">
+                                <md:PackIcon Width="20" Height="20">
+                                    <md:PackIcon.Style>
+                                        <Style TargetType="md:PackIcon">
+                                            <Setter Property="Kind" Value="WeatherSunny" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                                    <Setter Property="Kind" Value="WeatherNight" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </md:PackIcon.Style>
+                                </md:PackIcon>
+                            </Button>
                             <md:PackIcon Kind="Account"
                                          Width="20" Height="20"
                                          VerticalAlignment="Center"

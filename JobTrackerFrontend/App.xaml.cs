@@ -12,6 +12,8 @@ public partial class App : Application
         base.OnStartup(e);
 
         // Services
+        var themeService = new ThemeService();
+        themeService.Initialize();
         var authService = new AuthService();
         var apiClient = new ApiClient(authService);
         var navigationService = new NavigationService();
@@ -29,7 +31,7 @@ public partial class App : Application
         navigationService.Register("Invoices", () => new InvoicesView { DataContext = invoicesVm });
 
         // Main Window
-        var mainVm = new MainWindowViewModel(navigationService, authService);
+        var mainVm = new MainWindowViewModel(navigationService, authService, themeService);
         var mainWindow = new MainWindow { DataContext = mainVm };
         mainWindow.Show();
 

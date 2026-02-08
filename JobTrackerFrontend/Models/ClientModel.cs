@@ -15,6 +15,14 @@ public class ClientModel
     public bool IsActive { get; set; }
     public int? JobCount { get; set; }
     public int? ContactCount { get; set; }
+    public string? PrimaryContactFirstName { get; set; }
+    public string? PrimaryContactLastName { get; set; }
+    public string? PrimaryContactEmail { get; set; }
+    public string? PrimaryContactPhone { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    public string? PrimaryContactName =>
+        string.IsNullOrWhiteSpace(PrimaryContactFirstName) ? null
+        : $"{PrimaryContactFirstName} {PrimaryContactLastName}".Trim();
 }

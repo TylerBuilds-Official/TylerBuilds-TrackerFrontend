@@ -13,11 +13,22 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     Height="2"
+                     Margin="0,0,0,4"
+                     Background="Transparent"
+                     BorderThickness="0" />
+
         <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+        <DockPanel Grid.Row="1" Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
@@ -33,11 +44,12 @@
         </DockPanel>
 
         <!-- Status Filter -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
             <ComboBox Width="160"
                       md:HintAssist.Hint="Filter by status"
                       SelectedItem="{Binding StatusFilter}"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13">
                 <ComboBoxItem Content="" />
                 <ComboBoxItem Content="Draft" />
                 <ComboBoxItem Content="Sent" />
@@ -48,22 +60,34 @@
         </StackPanel>
 
         <!-- Invoice List -->
-        <DataGrid Grid.Row="2"
+        <DataGrid Grid.Row="3"
                   ItemsSource="{Binding Invoices}"
                   SelectedItem="{Binding SelectedInvoice}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   CanUserAddRows="False"
                   SelectionMode="Single"
-                  Style="{StaticResource MaterialDesignDataGrid}"
                   AlternationCount="2"
-                  AlternatingRowBackground="#08000000"
+                  AlternatingRowBackground="#0A455A64"
                   MouseDoubleClick="OnRowDoubleClick">
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Set Status">
+                        <MenuItem Header="Draft" Command="{Binding SetStatusCommand}" CommandParameter="Draft" />
+                        <MenuItem Header="Sent" Command="{Binding SetStatusCommand}" CommandParameter="Sent" />
+                        <MenuItem Header="Paid" Command="{Binding SetStatusCommand}" CommandParameter="Paid" />
+                        <MenuItem Header="Overdue" Command="{Binding SetStatusCommand}" CommandParameter="Overdue" />
+                        <MenuItem Header="Cancelled" Command="{Binding SetStatusCommand}" CommandParameter="Cancelled" />
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="Edit" Command="{Binding EditInvoiceCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="140" />
-                <DataGridTextColumn Header="Client" Binding="{Binding ClientName}" Width="160" />
-                <DataGridTextColumn Header="Job" Binding="{Binding JobTitle}" Width="*" />
-                <DataGridTemplateColumn Header="Status" Width="100">
+                <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
+                <DataGridTextColumn Header="Client" Binding="{Binding ClientName}" Width="2*" />
+                <DataGridTextColumn Header="Job" Binding="{Binding JobTitle}" Width="2*" />
+                <DataGridTemplateColumn Header="Status" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border CornerRadius="8"
@@ -77,17 +101,11 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="100" />
-                <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="100" />
-                <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="100" />
+                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
+                <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Loading -->
-        <ProgressBar Grid.Row="0" Grid.RowSpan="3"
-                     Style="{StaticResource MaterialDesignLinearProgressBar}"
-                     IsIndeterminate="True"
-                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     VerticalAlignment="Top" />
     </Grid>
 </UserControl>

@@ -1,8 +1,8 @@
-using System.IO;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace JobTrackerFrontend.Services;
+using System.IO;
 
 public class AuthService
 {

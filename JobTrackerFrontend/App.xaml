@@ -12,6 +12,53 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <!-- Card depth -->
+            <Style TargetType="md:Card" BasedOn="{StaticResource {x:Type md:Card}}">
+                <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+                <Setter Property="md:ElevationAssist.Elevation" Value="Dp2" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+
+            <!-- TabControl theme -->
+            <Style TargetType="TabControl" BasedOn="{StaticResource MaterialDesignTabControl}">
+                <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            </Style>
+
+            <!-- DataGrid theme -->
+            <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            </Style>
+
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}" />
+                        <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightForegroundBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                <Setter Property="Background" Value="#ECEFF1" />
+                <Setter Property="Foreground" Value="#546E7A" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding DataContext.IsDarkMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                        <Setter Property="Background" Value="#253238" />
+                        <Setter Property="Foreground" Value="#90A4AE" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <!-- Converters -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisConverter" />

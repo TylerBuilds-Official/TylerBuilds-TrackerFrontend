@@ -8,19 +8,26 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private readonly NavigationService _navigationService;
     private readonly AuthService _authService;
+    private readonly ThemeService _themeService;
 
     [ObservableProperty] private string _userName = "";
     [ObservableProperty] private bool _isNavExpanded = true;
     [ObservableProperty] private bool _isAuthenticated;
+    [ObservableProperty] private bool _isCheckingAuth = true;
+    [ObservableProperty] private string _authStatusMessage = "Checking for previous session...";
     [ObservableProperty] private string _selectedNavItem = "Dashboard";
     [ObservableProperty] private bool _staySignedIn = true;
 
     public NavigationService Navigation => _navigationService;
 
-    public MainWindowViewModel(NavigationService navigationService, AuthService authService)
+    [ObservableProperty] private bool _isDarkMode;
+
+    public MainWindowViewModel(NavigationService navigationService, AuthService authService, ThemeService themeService)
     {
         _navigationService = navigationService;
         _authService = authService;
+        _themeService = themeService;
+        _isDarkMode = themeService.IsDarkMode;
     }
 
     /// <summary>
@@ -28,15 +35,40 @@ public partial class MainWindowViewModel : ObservableObject
     /// </summary>
     public async Task TryAutoLoginAsync()
     {
-        await _authService.EnablePersistentCacheAsync();
+        IsCheckingAuth = true;
+        AuthStatusMessage = "Checking for previous session...";
 
-        if (await _authService.TrySilentLoginAsync())
+        try
         {
-            UserName = _authService.UserDisplayName ?? "User";
-            IsAuthenticated = true;
-            _navigationService.NavigateTo("Dashboard");
-            SelectedNavItem = "Dashboard";
+            await _authService.EnablePersistentCacheAsync();
+
+            AuthStatusMessage = "Restoring account...";
+            if (await _authService.TrySilentLoginAsync())
+            {
+                AuthStatusMessage = $"Welcome back, {_authService.UserDisplayName ?? "User"}";
+                await Task.Delay(600); // brief pause so the user sees the greeting
+
+                UserName = _authService.UserDisplayName ?? "User";
+                IsAuthenticated = true;
+                _navigationService.NavigateTo("Dashboard");
+                SelectedNavItem = "Dashboard";
+            }
         }
+        catch
+        {
+            // Silent login failed — fall through to login screen
+        }
+        finally
+        {
+            IsCheckingAuth = false;
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleDarkMode()
+    {
+        _themeService.Toggle();
+        IsDarkMode = _themeService.IsDarkMode;
     }
 
     [RelayCommand]

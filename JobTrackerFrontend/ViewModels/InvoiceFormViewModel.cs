@@ -29,12 +29,21 @@ public partial class InvoiceFormViewModel : ObservableObject
 
     // Track JobId for matching after async load
     private int? _initialJobId;
+    private int? _preSelectedClientId;
 
     /// <summary>Create mode.</summary>
     public InvoiceFormViewModel(ApiClient apiClient)
     {
         _apiClient = apiClient;
         _editingId = null;
+    }
+
+    /// <summary>Create mode with pre-filtered client jobs.</summary>
+    public InvoiceFormViewModel(ApiClient apiClient, int clientId)
+    {
+        _apiClient = apiClient;
+        _editingId = null;
+        _preSelectedClientId = clientId;
     }
 
     /// <summary>Edit mode — populate from existing invoice.</summary>
@@ -58,7 +67,10 @@ public partial class InvoiceFormViewModel : ObservableObject
     {
         try
         {
-            var data = await _apiClient.GetAsync<List<JobModel>>("/jobs");
+            var endpoint = _preSelectedClientId.HasValue
+                ? $"/jobs/by-client/{_preSelectedClientId.Value}"
+                : "/jobs";
+            var data = await _apiClient.GetAsync<List<JobModel>>(endpoint);
             Jobs = data ?? [];
 
             // In edit mode, match the job after loading

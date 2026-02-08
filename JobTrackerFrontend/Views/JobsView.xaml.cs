@@ -24,7 +24,7 @@ public partial class JobsView : UserControl
     {
         if (DataContext is JobsViewModel { SelectedJob: not null } vm)
         {
-            await vm.EditJobCommand.ExecuteAsync(null);
+            await vm.ViewDetailCommand.ExecuteAsync(null);
         }
     }
 }

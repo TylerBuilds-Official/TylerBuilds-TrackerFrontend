@@ -47,6 +47,14 @@ public partial class JobFormViewModel : ObservableObject
         _editingId = null;
     }
 
+    /// <summary>Create mode with pre-selected client.</summary>
+    public JobFormViewModel(ApiClient apiClient, ClientModel client)
+    {
+        _apiClient = apiClient;
+        _editingId = null;
+        _initialClientId = client.Id;
+    }
+
     /// <summary>Edit mode — populate from existing job.</summary>
     public JobFormViewModel(ApiClient apiClient, JobModel job)
     {

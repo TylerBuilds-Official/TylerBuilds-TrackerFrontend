@@ -12,16 +12,27 @@ public partial class JobsViewModel : ObservableObject
 {
     private readonly ApiClient _apiClient;
 
+    // List mode
     [ObservableProperty] private ObservableCollection<JobModel> _jobs = [];
     [ObservableProperty] private JobModel? _selectedJob;
     [ObservableProperty] private string? _statusFilter;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
 
+    // Detail mode
+    [ObservableProperty] private bool _isDetailMode;
+    [ObservableProperty] private JobModel? _detailJob;
+    [ObservableProperty] private ObservableCollection<InvoiceModel> _jobInvoices = [];
+    [ObservableProperty] private InvoiceModel? _selectedJobInvoice;
+
+    public List<string> Statuses { get; } = ["Lead", "Proposal", "Active", "Completed", "Invoiced"];
+
     public JobsViewModel(ApiClient apiClient)
     {
         _apiClient = apiClient;
     }
+
+    // ── List Mode ──────────────────────────────────────────
 
     [RelayCommand]
     private async Task LoadDataAsync()
@@ -48,6 +59,73 @@ public partial class JobsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ViewDetailAsync()
+    {
+        if (SelectedJob is null) return;
+
+        var job = await _apiClient.GetAsync<JobModel>($"/jobs/{SelectedJob.Id}");
+        if (job is null) return;
+
+        DetailJob = job;
+        IsDetailMode = true;
+        await LoadJobInvoicesAsync();
+    }
+
+    [RelayCommand]
+    private async Task BackToListAsync()
+    {
+        IsDetailMode = false;
+        DetailJob = null;
+        JobInvoices = [];
+        await LoadDataAsync();
+    }
+
+    private async Task LoadJobInvoicesAsync()
+    {
+        if (DetailJob is null) return;
+        try
+        {
+            var data = await _apiClient.GetAsync<List<InvoiceModel>>($"/invoices/by-job/{DetailJob.Id}");
+            JobInvoices = new ObservableCollection<InvoiceModel>(data ?? []);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to load invoices: {ex.Message}";
+        }
+    }
+
+    // ── Status Quick Action ────────────────────────────────
+
+    [RelayCommand]
+    private async Task SetStatusAsync(string status)
+    {
+        var job = IsDetailMode ? DetailJob : SelectedJob;
+        if (job is null) return;
+
+        try
+        {
+            var request = new UpdateJobStatusRequest { Status = status };
+            await _apiClient.PatchAsync<UpdateJobStatusRequest, JobModel>(
+                $"/jobs/{job.Id}/status", request);
+
+            if (IsDetailMode)
+            {
+                DetailJob = await _apiClient.GetAsync<JobModel>($"/jobs/{job.Id}");
+            }
+            else
+            {
+                await LoadDataAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to update status: {ex.Message}", "Error");
+        }
+    }
+
+    // ── Job CRUD ───────────────────────────────────────────
+
+    [RelayCommand]
     private async Task NewJobAsync()
     {
         var vm = new JobFormViewModel(_apiClient);
@@ -66,12 +144,13 @@ public partial class JobsViewModel : ObservableObject
     [RelayCommand]
     private async Task EditJobAsync()
     {
-        if (SelectedJob is null) return;
-
-        var job = await _apiClient.GetAsync<JobModel>($"/jobs/{SelectedJob.Id}");
+        var job = IsDetailMode ? DetailJob : SelectedJob;
         if (job is null) return;
 
-        var vm = new JobFormViewModel(_apiClient, job);
+        var fresh = await _apiClient.GetAsync<JobModel>($"/jobs/{job.Id}");
+        if (fresh is null) return;
+
+        var vm = new JobFormViewModel(_apiClient, fresh);
         var dialog = new JobFormDialog
         {
             DataContext = vm,
@@ -80,7 +159,15 @@ public partial class JobsViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            await LoadDataAsync();
+            if (IsDetailMode)
+            {
+                DetailJob = await _apiClient.GetAsync<JobModel>($"/jobs/{job.Id}");
+                await LoadJobInvoicesAsync();
+            }
+            else
+            {
+                await LoadDataAsync();
+            }
         }
     }
 }

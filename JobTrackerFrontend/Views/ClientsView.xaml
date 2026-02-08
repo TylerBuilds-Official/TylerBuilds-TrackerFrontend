@@ -6,6 +6,7 @@
              d:DataContext="{d:DesignInstance vm:ClientsViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:JobTrackerFrontend.Converters"
              mc:Ignorable="d"
              Loaded="OnLoaded">
 
@@ -15,54 +16,350 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Right"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <Button Content="Deactivate"
-                        Command="{Binding DeactivateClientCommand}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="0,0,12,0"
-                        IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
-                <Button Content="Edit"
-                        Command="{Binding EditClientCommand}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="0,0,12,0"
-                        IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
-                <Button Content="New Client"
-                        Command="{Binding NewClientCommand}"
-                        Style="{StaticResource MaterialDesignRaisedButton}" />
-            </StackPanel>
-        </DockPanel>
-
-        <!-- Client List -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Clients}"
-                  SelectedItem="{Binding SelectedClient}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  SelectionMode="Single"
-                  Style="{StaticResource MaterialDesignDataGrid}"
-                  AlternationCount="2"
-                  AlternatingRowBackground="#08000000"
-                  MouseDoubleClick="OnRowDoubleClick">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" />
-                <DataGridTextColumn Header="City" Binding="{Binding City}" Width="120" />
-                <DataGridTextColumn Header="State" Binding="{Binding State}" Width="60" />
-                <DataGridTextColumn Header="Jobs" Binding="{Binding JobCount}" Width="60" />
-                <DataGridTextColumn Header="Contacts" Binding="{Binding ContactCount}" Width="80" />
-            </DataGrid.Columns>
-        </DataGrid>
-
         <!-- Loading -->
-        <ProgressBar Grid.Row="0" Grid.RowSpan="2"
+        <ProgressBar Grid.Row="0"
                      Style="{StaticResource MaterialDesignLinearProgressBar}"
                      IsIndeterminate="True"
                      Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     VerticalAlignment="Top" />
+                     Height="2"
+                     Margin="0,0,0,4"
+                     Background="Transparent"
+                     BorderThickness="0" />
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- LIST MODE                                       -->
+        <!-- ════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding IsDetailMode, Converter={StaticResource InverseBoolToVisConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="Deactivate"
+                            Command="{Binding DeactivateClientCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,12,0"
+                            IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
+                    <Button Content="Edit"
+                            Command="{Binding EditClientCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,12,0"
+                            IsEnabled="{Binding SelectedClient, Converter={StaticResource NotNullToBoolConverter}}" />
+                    <Button Content="New Client"
+                            Command="{Binding NewClientCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}" />
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Client List -->
+            <DataGrid Grid.Row="1"
+                      ItemsSource="{Binding Clients}"
+                      SelectedItem="{Binding SelectedClient}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      SelectionMode="Single"
+                      AlternationCount="2"
+                      AlternatingRowBackground="#0A455A64"
+                      MouseDoubleClick="OnRowDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="*" />
+                    <DataGridTextColumn Header="Contact" Binding="{Binding PrimaryContactName}" Width="1.5*" />
+                    <DataGridTextColumn Header="Phone" Binding="{Binding PrimaryContactPhone}" Width="1.2*" />
+                    <DataGridTextColumn Header="Email" Binding="{Binding PrimaryContactEmail}" Width="2*" />
+                    <DataGridTextColumn Header="City" Binding="{Binding City}" Width="*" />
+                    <DataGridTextColumn Header="State" Binding="{Binding State}" Width="0.6*" />
+                    <DataGridTextColumn Header="Jobs" Binding="{Binding JobCount}" Width="0.6*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- DETAIL MODE                                     -->
+        <!-- ════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding IsDetailMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Back + Client Header -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,16">
+                <Button DockPanel.Dock="Left"
+                        Command="{Binding BackToListCommand}"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Padding="4,6" MinWidth="0"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="ArrowLeft" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="Clients" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Deactivate"
+                            Command="{Binding DeactivateClientCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,12,0" />
+                    <Button Content="Edit"
+                            Command="{Binding EditClientCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}" />
+                </StackPanel>
+
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding DetailClient.Name}"
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0" />
+            </DockPanel>
+
+            <!-- Client Info Cards -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Type & Website -->
+                <md:Card Grid.Column="0" Padding="16" Margin="0,0,6,0">
+                    <StackPanel>
+                        <TextBlock Text="Type" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailClient.Type}" FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock Text="Website" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailClient.Website, TargetNullValue=—}" FontSize="14" />
+                    </StackPanel>
+                </md:Card>
+
+                <!-- Address -->
+                <md:Card Grid.Column="1" Padding="16" Margin="6,0">
+                    <StackPanel>
+                        <TextBlock Text="Address" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailClient.AddressLine1, TargetNullValue=—}" FontSize="14" />
+                        <TextBlock Text="{Binding DetailClient.AddressLine2}" FontSize="14"
+                                   Visibility="{Binding DetailClient.AddressLine2, Converter={StaticResource NullToCollapsedConverter}}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="{Binding DetailClient.City}" FontSize="14" />
+                            <TextBlock Text=", " FontSize="14"
+                                       Visibility="{Binding DetailClient.City, Converter={StaticResource NullToCollapsedConverter}}" />
+                            <TextBlock Text="{Binding DetailClient.State}" FontSize="14" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding DetailClient.Zip}" FontSize="14" />
+                        </StackPanel>
+                    </StackPanel>
+                </md:Card>
+
+                <!-- Notes -->
+                <md:Card Grid.Column="2" Padding="16" Margin="6,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Notes" Opacity="0.6" FontSize="11" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding DetailClient.Notes, TargetNullValue=—}"
+                                   FontSize="14" TextWrapping="Wrap" MaxHeight="80" />
+                    </StackPanel>
+                </md:Card>
+            </Grid>
+
+            <!-- Custom tab header row + action buttons -->
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Tab header bar -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,0">
+                    <!-- Action buttons docked right -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                        <!-- Contacts tab buttons -->
+                        <Button Content="Remove" Command="{Binding RemoveContactCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedContact, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Edit" Command="{Binding EditContactCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedContact, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Add Contact" Command="{Binding NewContactCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <!-- Jobs tab button -->
+                        <Button Content="Add Job" Command="{Binding NewJobCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="1" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <!-- Invoices tab button -->
+                        <Button Content="Add Invoice" Command="{Binding NewInvoiceCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="2" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Tab buttons -->
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Contacts" GroupName="DetailTab"
+                                     IsChecked="True"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Checked="TabRadio_Checked" Tag="0"
+                                     Padding="16,8" FontSize="13" FontWeight="Medium" Cursor="Hand" />
+                        <RadioButton Content="Jobs" GroupName="DetailTab"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Checked="TabRadio_Checked" Tag="1"
+                                     Padding="16,8" FontSize="13" FontWeight="Medium" Cursor="Hand" />
+                        <RadioButton Content="Invoices" GroupName="DetailTab"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Checked="TabRadio_Checked" Tag="2"
+                                     Padding="16,8" FontSize="13" FontWeight="Medium" Cursor="Hand" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Tab content (headers removed via template) -->
+                <TabControl x:Name="DetailTabs" Grid.Row="1" SelectedIndex="0">
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <ContentPresenter ContentSource="SelectedContent" />
+                        </ControlTemplate>
+                    </TabControl.Template>
+
+                    <!-- ── Contacts Tab ── -->
+                    <TabItem>
+                        <DataGrid Margin="0,12,0,0"
+                                  ItemsSource="{Binding Contacts}"
+                                  SelectedItem="{Binding SelectedContact}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="1.5*" />
+                                <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="1.5*" />
+                                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*" />
+                                <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="1.5*" />
+                                <DataGridTextColumn Header="Title" Binding="{Binding JobTitle}" Width="1.5*" />
+                                <DataGridTemplateColumn Header="Primary" Width="0.8*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <md:PackIcon Kind="CheckCircle" Width="16" Height="16"
+                                                         Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                         Visibility="{Binding IsPrimary, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                         HorizontalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+
+                    <!-- ── Jobs Tab ── -->
+                    <TabItem>
+                        <DataGrid Margin="0,12,0,0"
+                                  ItemsSource="{Binding ClientJobs}"
+                                  SelectedItem="{Binding SelectedClientJob}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2.5*" />
+                                <DataGridTemplateColumn Header="Status" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8"
+                                                    Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                                                    Padding="8,2" Margin="0,2"
+                                                    HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Status}"
+                                                           Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                                           FontSize="11" FontWeight="Medium" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Billing" Binding="{Binding BillingType}" Width="*" />
+                                <DataGridTextColumn Header="Est. Value" Binding="{Binding EstimatedValue, StringFormat=C}" Width="*" />
+                                <DataGridTextColumn Header="Paid" Binding="{Binding TotalPaid, StringFormat=C}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+
+                    <!-- ── Invoices Tab ── -->
+                    <TabItem>
+                        <DataGrid Margin="0,12,0,0"
+                                  ItemsSource="{Binding ClientInvoices}"
+                                  SelectedItem="{Binding SelectedClientInvoice}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
+                                <DataGridTextColumn Header="Job" Binding="{Binding JobTitle}" Width="2*" />
+                                <DataGridTemplateColumn Header="Status" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8"
+                                                    Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                                                    Padding="8,2" Margin="0,2"
+                                                    HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Status}"
+                                                           Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                                           FontSize="11" FontWeight="Medium" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
+                                <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Grid>
+
     </Grid>
 </UserControl>

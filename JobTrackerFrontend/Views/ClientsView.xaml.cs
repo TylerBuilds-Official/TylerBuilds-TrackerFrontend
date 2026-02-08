@@ -24,7 +24,16 @@ public partial class ClientsView : UserControl
     {
         if (DataContext is ClientsViewModel { SelectedClient: not null } vm)
         {
-            await vm.EditClientCommand.ExecuteAsync(null);
+            await vm.ViewDetailCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void TabRadio_Checked(object sender, RoutedEventArgs e)
+    {
+        if (DetailTabs is null) return;
+        if (sender is FrameworkElement { Tag: string tag } && int.TryParse(tag, out var index))
+        {
+            DetailTabs.SelectedIndex = index;
         }
     }
 }

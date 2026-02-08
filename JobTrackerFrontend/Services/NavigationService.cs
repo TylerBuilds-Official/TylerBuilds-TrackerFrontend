@@ -26,4 +26,10 @@ public class NavigationService : ObservableObject
             CurrentView = factory();
         }
     }
+
+    /// <summary>Navigate directly to a pre-built view instance (for detail views with parameters).</summary>
+    public void NavigateToView(object view)
+    {
+        CurrentView = view;
+    }
 }

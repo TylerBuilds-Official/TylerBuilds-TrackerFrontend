@@ -20,6 +20,9 @@ public partial class ClientFormViewModel : ObservableObject
     [ObservableProperty] private string? _state;
     [ObservableProperty] private string? _zip;
     [ObservableProperty] private string? _notes;
+    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _phone;
+    [ObservableProperty] private bool _isIndividual;
     [ObservableProperty] private bool _isSaving;
     [ObservableProperty] private string? _errorMessage;
 
@@ -27,6 +30,11 @@ public partial class ClientFormViewModel : ObservableObject
     public bool Saved { get; private set; }
 
     public List<string> ClientTypes { get; } = ["Company", "Individual"];
+
+    partial void OnTypeChanged(string value)
+    {
+        IsIndividual = value == "Individual";
+    }
 
     /// <summary>Create mode.</summary>
     public ClientFormViewModel(ApiClient apiClient)
@@ -52,6 +60,9 @@ public partial class ClientFormViewModel : ObservableObject
         State = client.State;
         Zip = client.Zip;
         Notes = client.Notes;
+        Email = client.PrimaryContactEmail;
+        Phone = client.PrimaryContactPhone;
+        IsIndividual = client.Type == "Individual";
     }
 
     [RelayCommand]
@@ -80,7 +91,9 @@ public partial class ClientFormViewModel : ObservableObject
                     City = City?.Trim(),
                     State = State?.Trim(),
                     Zip = Zip?.Trim(),
-                    Notes = Notes?.Trim()
+                    Notes = Notes?.Trim(),
+                    Email = IsIndividual ? Email?.Trim() : null,
+                    Phone = IsIndividual ? Phone?.Trim() : null,
                 };
                 await _apiClient.PutAsync<UpdateClientRequest, ClientModel>($"/clients/{_editingId}", request);
             }
@@ -96,7 +109,9 @@ public partial class ClientFormViewModel : ObservableObject
                     City = City?.Trim(),
                     State = State?.Trim(),
                     Zip = Zip?.Trim(),
-                    Notes = Notes?.Trim()
+                    Notes = Notes?.Trim(),
+                    Email = IsIndividual ? Email?.Trim() : null,
+                    Phone = IsIndividual ? Phone?.Trim() : null,
                 };
                 await _apiClient.PostAsync<CreateClientRequest, ClientModel>("/clients", request);
             }

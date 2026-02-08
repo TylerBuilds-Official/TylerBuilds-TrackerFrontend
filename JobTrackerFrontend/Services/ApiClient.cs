@@ -7,15 +7,18 @@ namespace JobTrackerFrontend.Services;
 
 public class ApiClient
 {
+    
     private readonly HttpClient _httpClient;
     private readonly AuthService _authService;
 
+    
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    
     public ApiClient(AuthService authService)
     {
         _authService = authService;
@@ -25,12 +28,14 @@ public class ApiClient
         };
     }
 
+    
     private async Task AttachTokenAsync()
     {
         var token = await _authService.GetAccessTokenAsync();
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
+    
     public async Task<T?> GetAsync<T>(string endpoint)
     {
         await AttachTokenAsync();
@@ -39,6 +44,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<T>(JsonOptions);
     }
 
+    
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest body)
     {
         await AttachTokenAsync();
@@ -47,6 +53,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions);
     }
 
+    
     public async Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest body)
     {
         await AttachTokenAsync();
@@ -55,6 +62,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions);
     }
 
+    
     public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string endpoint, TRequest body)
     {
         await AttachTokenAsync();
@@ -65,6 +73,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions);
     }
 
+    
     public async Task PatchAsync(string endpoint)
     {
         await AttachTokenAsync();

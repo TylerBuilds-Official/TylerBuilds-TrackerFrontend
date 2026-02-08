@@ -12,12 +12,30 @@
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     Height="2"
+                     Margin="0,0,0,4"
+                     Background="Transparent"
+                     BorderThickness="0" />
+
         <!-- Revenue Cards -->
-        <UniformGrid Grid.Row="0" Columns="4" Margin="0,0,0,24">
-            <md:Card Margin="6,0" Padding="16">
+        <Grid Grid.Row="1" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <md:Card Grid.Column="0" Margin="0,0,6,0" Padding="16">
                 <StackPanel>
                     <TextBlock Text="Total Revenue"
                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
@@ -27,7 +45,7 @@
                                Margin="0,8,0,0" />
                 </StackPanel>
             </md:Card>
-            <md:Card Margin="6,0" Padding="16">
+            <md:Card Grid.Column="1" Margin="6,0" Padding="16">
                 <StackPanel>
                     <TextBlock Text="Outstanding"
                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
@@ -37,7 +55,7 @@
                                Margin="0,8,0,0" />
                 </StackPanel>
             </md:Card>
-            <md:Card Margin="6,0" Padding="16">
+            <md:Card Grid.Column="2" Margin="6,0" Padding="16">
                 <StackPanel>
                     <TextBlock Text="Overdue"
                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
@@ -48,7 +66,7 @@
                                Margin="0,8,0,0" />
                 </StackPanel>
             </md:Card>
-            <md:Card Margin="6,0" Padding="16">
+            <md:Card Grid.Column="3" Margin="6,0,0,0" Padding="16">
                 <StackPanel>
                     <TextBlock Text="Paid Invoices"
                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
@@ -58,17 +76,17 @@
                                Margin="0,8,0,0" />
                 </StackPanel>
             </md:Card>
-        </UniformGrid>
+        </Grid>
 
         <!-- Pipeline + Recent Activity -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Job Pipeline -->
-            <md:Card Grid.Column="0" Margin="0,0,12,0" Padding="16">
+            <md:Card Grid.Column="0" Margin="0,0,6,0" Padding="16">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top"
                                Text="Job Pipeline"
@@ -97,7 +115,7 @@
             </md:Card>
 
             <!-- Recent Activity -->
-            <md:Card Grid.Column="1" Margin="12,0,0,0" Padding="16">
+            <md:Card Grid.Column="1" Margin="6,0,0,0" Padding="16">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top"
                                Text="Recent Activity"
@@ -121,11 +139,5 @@
             </md:Card>
         </Grid>
 
-        <!-- Loading Overlay -->
-        <ProgressBar Grid.Row="0" Grid.RowSpan="2"
-                     Style="{StaticResource MaterialDesignLinearProgressBar}"
-                     IsIndeterminate="True"
-                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                     VerticalAlignment="Top" />
     </Grid>
 </UserControl>
