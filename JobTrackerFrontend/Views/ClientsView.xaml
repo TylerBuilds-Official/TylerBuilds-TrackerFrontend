@@ -32,6 +32,7 @@
         <Grid Grid.Row="1" Visibility="{Binding IsDetailMode, Converter={StaticResource InverseBoolToVisConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -56,8 +57,23 @@
                 </StackPanel>
             </DockPanel>
 
+            <!-- Filters -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                <ComboBox Width="160"
+                          md:HintAssist.Hint="Filter by type"
+                          SelectedItem="{Binding TypeFilter}"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Padding="8,4" FontSize="13"
+                          >
+                    <ComboBoxItem Content="" />
+                    <ComboBoxItem Content="Company" />
+                    <ComboBoxItem Content="Individual" />
+                </ComboBox>
+
+            </StackPanel>
+
             <!-- Client List -->
-            <DataGrid Grid.Row="1"
+            <DataGrid Grid.Row="2"
                       ItemsSource="{Binding Clients}"
                       SelectedItem="{Binding SelectedClient}"
                       AutoGenerateColumns="False"
@@ -224,7 +240,31 @@
                                 </Binding>
                             </Button.Visibility>
                         </Button>
-                        <!-- Invoices tab button -->
+                        <!-- Invoices tab buttons: Open | Delete | Add Invoice -->
+                        <Button Content="Open Invoice" Command="{Binding OpenInvoiceFileCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedClientInvoice.NetworkFilePath, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="2" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Delete" Command="{Binding DeleteInvoiceCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedClientInvoice, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="2" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
                         <Button Content="Add Invoice" Command="{Binding NewInvoiceCommand}"
                                 Style="{StaticResource MaterialDesignOutlinedButton}"
                                 Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">

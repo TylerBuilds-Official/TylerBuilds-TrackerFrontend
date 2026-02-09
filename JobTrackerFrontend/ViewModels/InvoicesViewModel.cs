@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,7 +20,7 @@ public partial class InvoicesViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
 
-    public List<string> Statuses { get; } = ["Draft", "Sent", "Paid", "Overdue", "Cancelled"];
+    public List<string> Statuses { get; } = ["Draft", "Sent", "Partially Paid", "Paid", "Overdue", "Cancelled"];
 
     public InvoicesViewModel(ApiClient apiClient)
     {
@@ -81,6 +83,50 @@ public partial class InvoicesViewModel : ObservableObject
         {
             await LoadDataAsync();
         }
+    }
+
+    [RelayCommand]
+    private async Task DeleteInvoiceAsync()
+    {
+        if (SelectedInvoice is null) return;
+
+        var result = MessageBox.Show(
+            $"Are you sure you want to permanently delete invoice \"{SelectedInvoice.DisplayNumber}\"?\n\n" +
+            "Consider marking it as Cancelled or Paid instead.\nThis action cannot be undone.",
+            "Delete Invoice",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
+        {
+            // Delete the network file if it exists
+            if (!string.IsNullOrEmpty(SelectedInvoice.NetworkFilePath) && File.Exists(SelectedInvoice.NetworkFilePath))
+                File.Delete(SelectedInvoice.NetworkFilePath);
+
+            await _apiClient.DeleteAsync($"/invoices/{SelectedInvoice.Id}");
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to delete invoice: {ex.Message}", "Error");
+        }
+    }
+
+    [RelayCommand]
+    private void OpenInvoiceFile()
+    {
+        if (SelectedInvoice is null || string.IsNullOrEmpty(SelectedInvoice.NetworkFilePath))
+            return;
+
+        if (!File.Exists(SelectedInvoice.NetworkFilePath))
+        {
+            MessageBox.Show("Invoice file not found.", "Error");
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo(SelectedInvoice.NetworkFilePath) { UseShellExecute = true });
     }
 
     [RelayCommand]

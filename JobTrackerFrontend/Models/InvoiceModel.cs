@@ -20,8 +20,11 @@ public class InvoiceModel
     public string? City { get; set; }
     public string? State { get; set; }
     public string? Zip { get; set; }
+    public decimal TotalPaid { get; set; }
+    public string? NetworkFilePath { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
     public string DisplayNumber => $"{InvoiceNumber}-{Iteration}";
+    public decimal BalanceRemaining => Amount - TotalPaid;
 }

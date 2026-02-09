@@ -19,7 +19,7 @@ public partial class App : Application
         var navigationService = new NavigationService();
 
         // ViewModels
-        var dashboardVm = new DashboardViewModel(apiClient);
+        var dashboardVm = new DashboardViewModel(apiClient, themeService);
         var clientsVm = new ClientsViewModel(apiClient);
         var jobsVm = new JobsViewModel(apiClient);
         var invoicesVm = new InvoicesViewModel(apiClient);

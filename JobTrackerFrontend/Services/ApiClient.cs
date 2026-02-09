@@ -81,4 +81,11 @@ public class ApiClient
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task DeleteAsync(string endpoint)
+    {
+        await AttachTokenAsync();
+        var response = await _httpClient.DeleteAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+    }
 }

@@ -8,7 +8,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
-        Width="500" SizeToContent="Height"
+        Width="520" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -16,88 +16,205 @@
         FontFamily="{md:MaterialDesignFont}"
         Loaded="OnLoaded">
 
-    <StackPanel Margin="24">
-        <!-- Job -->
-        <ComboBox ItemsSource="{Binding Jobs}"
-                  SelectedItem="{Binding SelectedJob}"
-                  md:HintAssist.Hint="Job *"
-                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                  Margin="0,0,0,16">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock>
-                        <Run Text="{Binding Title}" />
-                        <Run Text=" — " />
-                        <Run Text="{Binding ClientName}" />
-                    </TextBlock>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="700">
+        <StackPanel Margin="24">
+            <!-- Job -->
+            <ComboBox ItemsSource="{Binding Jobs}"
+                      SelectedItem="{Binding SelectedJob}"
+                      md:HintAssist.Hint="Job *"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Margin="0,0,0,16">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock>
+                            <Run Text="{Binding Title}" />
+                            <Run Text=" — " />
+                            <Run Text="{Binding ClientName}" />
+                        </TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
-        <!-- Amount -->
-        <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
-                 md:HintAssist.Hint="Amount *"
-                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                 Margin="0,0,0,16" />
+            <!-- Amount -->
+            <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                     md:HintAssist.Hint="Amount *"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Margin="0,0,0,16" />
 
-        <!-- Date Row -->
-        <Grid Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <!-- Date Row -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <DatePicker Grid.Column="0"
-                        SelectedDate="{Binding IssuedDate}"
-                        md:HintAssist.Hint="Issued Date"
-                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                        Margin="0,0,8,0" />
+                <DatePicker Grid.Column="0"
+                            SelectedDate="{Binding IssuedDate}"
+                            md:HintAssist.Hint="Issued Date"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                            Margin="0,0,8,0" />
 
-            <DatePicker Grid.Column="1"
-                        SelectedDate="{Binding DueDate}"
-                        md:HintAssist.Hint="Due Date"
-                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
-                        Margin="8,0,0,0" />
-        </Grid>
+                <DatePicker Grid.Column="1"
+                            SelectedDate="{Binding DueDate}"
+                            md:HintAssist.Hint="Due Date"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                            Margin="8,0,0,0" />
+            </Grid>
 
-        <!-- Status (edit mode only) -->
-        <ComboBox ItemsSource="{Binding Statuses}"
-                  SelectedItem="{Binding SelectedStatus}"
-                  md:HintAssist.Hint="Status"
-                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                  Visibility="{Binding IsEdit, Converter={StaticResource BooleanToVisibilityConverter}}"
-                  Margin="0,0,0,16" />
+            <!-- Status (edit mode only) -->
+            <ComboBox ItemsSource="{Binding Statuses}"
+                      SelectedItem="{Binding SelectedStatus}"
+                      md:HintAssist.Hint="Status"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Visibility="{Binding IsEdit, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      Margin="0,0,0,16" />
 
-        <!-- Notes -->
-        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
-                 md:HintAssist.Hint="Notes"
-                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 MinHeight="60"
-                 MaxHeight="120"
-                 VerticalScrollBarVisibility="Auto"
-                 Margin="0,0,0,16" />
+            <!-- Open Invoice File (edit mode, file exists) -->
+            <Button Command="{Binding OpenInvoiceFileCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,0,16"
+                    Visibility="{Binding HasInvoiceFile, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <md:PackIcon Kind="FileDocumentOutline" Width="18" Height="18"
+                                 VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <TextBlock Text="Open Invoice File" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
 
-        <!-- Error Message -->
-        <TextBlock Text="{Binding ErrorMessage}"
-                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
-                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"
-                   Margin="0,0,0,12"
-                   TextWrapping="Wrap" />
+            <!-- Notes -->
+            <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                     md:HintAssist.Hint="Notes"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="60"
+                     MaxHeight="120"
+                     VerticalScrollBarVisibility="Auto"
+                     Margin="0,0,0,16" />
 
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Cancel"
-                    Command="{Binding CancelCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    Margin="0,0,12,0" />
-            <Button Content="Save"
-                    Command="{Binding SaveCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Style="{StaticResource MaterialDesignRaisedButton}"
-                    IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBooleanConverter}}" />
+            <!-- ============================================ -->
+            <!-- Payment Section (edit mode only) -->
+            <!-- ============================================ -->
+            <StackPanel Visibility="{Binding IsEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                <Separator Margin="0,4,0,16" />
+
+                <!-- Header + Balance -->
+                <DockPanel Margin="0,0,0,12">
+                    <TextBlock Text="Payments"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               VerticalAlignment="Center" />
+                    <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Paid: " Opacity="0.6" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding TotalPaid, StringFormat=C}" FontWeight="Medium"
+                                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                   VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <TextBlock Text="Balance: " Opacity="0.6" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding BalanceRemaining, StringFormat=C}" FontWeight="Bold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Payment History -->
+                <ItemsControl ItemsSource="{Binding Payments}" Margin="0,0,0,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#0A000000" BorderThickness="0,0,0,1" Padding="4,6">
+                                <DockPanel>
+                                    <md:PackIcon Kind="CashCheck" Width="16" Height="16"
+                                                 Margin="0,0,8,0" VerticalAlignment="Center"
+                                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                    <TextBlock VerticalAlignment="Center">
+                                        <Run Text="{Binding Amount, StringFormat=C, Mode=OneWay}" FontWeight="Medium" />
+                                        <Run Text=" on " />
+                                        <Run Text="{Binding PaidDate, StringFormat=d, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Notes}" Opacity="0.5"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" MaxWidth="160" />
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Record Payment Form (only if balance remaining) -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFullyPaid}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Payment Amount + Date -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                 md:HintAssist.Hint="Payment Amount"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 Margin="0,0,8,0" />
+
+                        <DatePicker Grid.Column="1"
+                                    SelectedDate="{Binding PaymentDate}"
+                                    md:HintAssist.Hint="Payment Date"
+                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                    Margin="8,0,0,0" />
+                    </Grid>
+
+                    <!-- Payment Notes -->
+                    <TextBox Text="{Binding PaymentNotes, UpdateSourceTrigger=PropertyChanged}"
+                             md:HintAssist.Hint="Payment Notes (optional)"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Margin="0,0,0,12" />
+
+                    <!-- Payment Error -->
+                    <TextBlock Text="{Binding PaymentErrorMessage}"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                               Visibility="{Binding PaymentErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"
+                               Margin="0,0,0,8"
+                               TextWrapping="Wrap" />
+
+                    <!-- Record Payment Button -->
+                    <Button Content="Record Payment"
+                            Command="{Binding RecordPaymentCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalAlignment="Left"
+                            IsEnabled="{Binding IsRecordingPayment, Converter={StaticResource InverseBooleanConverter}}"
+                            Margin="0,0,0,8" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Error Message -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"
+                       Margin="0,0,0,12"
+                       TextWrapping="Wrap" />
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Margin="0,0,12,0" />
+                <Button Content="Save"
+                        Command="{Binding SaveCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBooleanConverter}}" />
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
+    </ScrollViewer>
 </Window>

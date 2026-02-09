@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              d:DataContext="{d:DesignInstance vm:DashboardViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,6 +12,7 @@
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -78,8 +80,50 @@
             </md:Card>
         </Grid>
 
+        <!-- Income by Job Chart -->
+        <md:Card Grid.Row="2" Margin="0,0,0,24" Padding="20">
+            <DockPanel>
+                <!-- Header row -->
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ChartTitle}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                        <!-- Inline legend -->
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Ellipse Width="8" Height="8" Fill="#388E3C" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Paid" FontSize="11" Opacity="0.6" Margin="0,0,14,0" VerticalAlignment="Center" />
+                            <Ellipse Width="8" Height="8" Fill="#FFA000" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Invoiced" FontSize="11" Opacity="0.6" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"
+                                VerticalAlignment="Top">
+                        <RadioButton Content="This Month" GroupName="ChartPeriod"
+                                     IsChecked="True"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Command="{Binding SetMonthViewCommand}"
+                                     Padding="10,5" FontSize="12" Cursor="Hand" />
+                        <RadioButton Content="This Year" GroupName="ChartPeriod"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Command="{Binding SetYearViewCommand}"
+                                     Padding="10,5" FontSize="12" Cursor="Hand" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Chart -->
+                <lvc:CartesianChart Height="260"
+                                    Series="{Binding IncomeChartSeries}"
+                                    XAxes="{Binding IncomeXAxes}"
+                                    YAxes="{Binding IncomeYAxes}"
+                                    TooltipPosition="Hidden"
+                                    LegendPosition="Hidden"
+                                    AnimationsSpeed="00:00:00.3"
+                                    Margin="0,8,0,0" />
+            </DockPanel>
+        </md:Card>
+
         <!-- Pipeline + Recent Activity -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />

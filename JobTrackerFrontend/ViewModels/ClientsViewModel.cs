@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,6 +19,9 @@ public partial class ClientsViewModel : ObservableObject
     [ObservableProperty] private ClientModel? _selectedClient;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
+    [ObservableProperty] private string? _typeFilter;
+
+    private List<ClientModel> _allClients = [];
 
     // Detail mode
     [ObservableProperty] private bool _isDetailMode;
@@ -42,8 +47,8 @@ public partial class ClientsViewModel : ObservableObject
         ErrorMessage = null;
         try
         {
-            var data = await _apiClient.GetAsync<List<ClientModel>>("/clients?active_only=true");
-            Clients = new ObservableCollection<ClientModel>(data ?? []);
+            _allClients = await _apiClient.GetAsync<List<ClientModel>>("/clients?active_only=true") ?? [];
+            ApplyFilters();
         }
         catch (Exception ex)
         {
@@ -77,6 +82,18 @@ public partial class ClientsViewModel : ObservableObject
         ClientJobs = [];
         ClientInvoices = [];
         await LoadDataAsync();
+    }
+
+    partial void OnTypeFilterChanged(string? value) => ApplyFilters();
+
+    private void ApplyFilters()
+    {
+        IEnumerable<ClientModel> filtered = _allClients;
+
+        if (!string.IsNullOrEmpty(TypeFilter))
+            filtered = filtered.Where(c => c.Type == TypeFilter);
+
+        Clients = new ObservableCollection<ClientModel>(filtered.OrderBy(c => c.Name));
     }
 
     // ── Detail Mode ────────────────────────────────────────
@@ -221,6 +238,49 @@ public partial class ClientsViewModel : ObservableObject
         if (dialog.ShowDialog() == true)
         {
             await LoadDetailDataAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void OpenInvoiceFile()
+    {
+        if (SelectedClientInvoice is null || string.IsNullOrEmpty(SelectedClientInvoice.NetworkFilePath))
+            return;
+
+        if (!File.Exists(SelectedClientInvoice.NetworkFilePath))
+        {
+            MessageBox.Show("Invoice file not found.", "Error");
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo(SelectedClientInvoice.NetworkFilePath) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private async Task DeleteInvoiceAsync()
+    {
+        if (SelectedClientInvoice is null) return;
+
+        var result = MessageBox.Show(
+            $"Are you sure you want to permanently delete invoice \"{SelectedClientInvoice.DisplayNumber}\"?\n\n" +
+            "Consider marking it as Cancelled or Paid instead.\nThis action cannot be undone.",
+            "Delete Invoice",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
+        {
+            if (!string.IsNullOrEmpty(SelectedClientInvoice.NetworkFilePath) && File.Exists(SelectedClientInvoice.NetworkFilePath))
+                File.Delete(SelectedClientInvoice.NetworkFilePath);
+
+            await _apiClient.DeleteAsync($"/invoices/{SelectedClientInvoice.Id}");
+            await LoadDetailDataAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to delete invoice: {ex.Message}", "Error");
         }
     }
 

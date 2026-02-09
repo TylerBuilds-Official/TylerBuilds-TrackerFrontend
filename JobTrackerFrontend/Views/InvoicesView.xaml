@@ -32,6 +32,16 @@
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
+                <Button Content="Open Invoice"
+                        Command="{Binding OpenInvoiceFileCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedInvoice.NetworkFilePath, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Delete"
+                        Command="{Binding DeleteInvoiceCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedInvoice, Converter={StaticResource NotNullToBoolConverter}}" />
                 <Button Content="Edit"
                         Command="{Binding EditInvoiceCommand}"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
@@ -53,6 +63,7 @@
                 <ComboBoxItem Content="" />
                 <ComboBoxItem Content="Draft" />
                 <ComboBoxItem Content="Sent" />
+                <ComboBoxItem Content="Partially Paid" />
                 <ComboBoxItem Content="Paid" />
                 <ComboBoxItem Content="Overdue" />
                 <ComboBoxItem Content="Cancelled" />
@@ -75,12 +86,16 @@
                     <MenuItem Header="Set Status">
                         <MenuItem Header="Draft" Command="{Binding SetStatusCommand}" CommandParameter="Draft" />
                         <MenuItem Header="Sent" Command="{Binding SetStatusCommand}" CommandParameter="Sent" />
+                        <MenuItem Header="Partially Paid" Command="{Binding SetStatusCommand}" CommandParameter="Partially Paid" />
                         <MenuItem Header="Paid" Command="{Binding SetStatusCommand}" CommandParameter="Paid" />
                         <MenuItem Header="Overdue" Command="{Binding SetStatusCommand}" CommandParameter="Overdue" />
                         <MenuItem Header="Cancelled" Command="{Binding SetStatusCommand}" CommandParameter="Cancelled" />
                     </MenuItem>
                     <Separator />
                     <MenuItem Header="Edit" Command="{Binding EditInvoiceCommand}" />
+                    <MenuItem Header="Open Invoice File" Command="{Binding OpenInvoiceFileCommand}" />
+                    <Separator />
+                    <MenuItem Header="Delete" Command="{Binding DeleteInvoiceCommand}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>
@@ -102,8 +117,8 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                <DataGridTextColumn Header="Paid" Binding="{Binding TotalPaid, StringFormat=C}" Width="*" />
                 <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
-                <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
 

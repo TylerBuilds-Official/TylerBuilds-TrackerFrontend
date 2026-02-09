@@ -22,4 +22,8 @@ public class AppConfig
     public static string ClientId => Configuration["AzureAd:ClientId"] ?? "";
     public static string[] Scopes => Configuration.GetSection("AzureAd:Scopes").Get<string[]>() ?? Array.Empty<string>();
     public static string Authority => $"https://login.microsoftonline.com/{TenantId}";
+
+    // Invoices
+    public static string InvoiceTemplatePath => Configuration["Invoices:TemplatePath"] ?? "";
+    public static string InvoiceOutputFolder => Configuration["Invoices:OutputFolder"] ?? "";
 }
