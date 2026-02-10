@@ -1,0 +1,389 @@
+<UserControl x:Class="JobTrackerFrontend.Views.TimeClockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+             d:DataContext="{d:DesignInstance vm:TimeClockViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Loaded="OnLoaded">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     Height="2"
+                     Margin="0,0,0,4"
+                     Background="Transparent"
+                     BorderThickness="0" />
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- TOP: Punch Kiosk                               -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <md:Card Grid.Row="1" Margin="0,0,0,20" Padding="0">
+            <Grid MinHeight="220">
+
+                <!-- STATE 1: Passcode Entry -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KioskState}" Value="PasscodeEntry">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <md:PackIcon Kind="ClockOutline" Width="40" Height="40"
+                                 HorizontalAlignment="Center" Margin="0,0,0,12"
+                                 Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Enter your employee ID and passcode"
+                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                               HorizontalAlignment="Center" Margin="0,0,0,16" Opacity="0.6" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBox x:Name="EmployeeIdBox"
+                                 Width="160"
+                                 md:HintAssist.Hint="Employee ID"
+                                 Text="{Binding EmployeeId, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 FontSize="18"
+                                 Padding="8,6"
+                                 Margin="0,0,12,0"
+                                 KeyDown="OnEmployeeIdKeyDown" />
+                        <PasswordBox x:Name="PasscodeBox"
+                                     Width="140"
+                                     md:HintAssist.Hint="Passcode"
+                                     Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                     FontSize="18"
+                                     MaxLength="4"
+                                     Padding="8,6"
+                                     PasswordChanged="OnPasscodeChanged"
+                                     KeyDown="OnPasscodeKeyDown" />
+                        <Button Content="Check In"
+                                Command="{Binding CheckPasscodeCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Height="42" Margin="12,0,0,0"
+                                FontSize="14"
+                                IsEnabled="{Binding IsKioskBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                    </StackPanel>
+
+                    <!-- Error message -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                               HorizontalAlignment="Center" Margin="0,12,0,0"
+                               FontSize="13"
+                               Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+
+                <!-- STATE 2: Worker Identified (Not Clocked In) -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Margin="20">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KioskState}" Value="NotClockedIn">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Welcome + Cancel -->
+                    <DockPanel Margin="0,0,0,16">
+                        <Button Content="Cancel" DockPanel.Dock="Right"
+                                Command="{Binding ResetKioskCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                VerticalAlignment="Center" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}">
+                                <Run Text="Welcome, " /><Run Text="{Binding WorkerName}" FontWeight="SemiBold" />
+                            </TextBlock>
+                            <TextBlock Text="You are not clocked in." Opacity="0.6" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Clock-In Form -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <ComboBox Width="220"
+                                  md:HintAssist.Hint="Job Code (required)"
+                                  ItemsSource="{Binding JobCodes}"
+                                  SelectedItem="{Binding SelectedJobCode}"
+                                  DisplayMemberPath="DisplayName"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Padding="8,4" FontSize="13"
+                                  Margin="0,0,12,0" />
+                        <ComboBox Width="220"
+                                  md:HintAssist.Hint="Job (optional)"
+                                  ItemsSource="{Binding ActiveJobs}"
+                                  SelectedItem="{Binding SelectedJob}"
+                                  DisplayMemberPath="Title"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  Padding="8,4" FontSize="13" />
+                    </StackPanel>
+
+                    <TextBox Width="452" Margin="0,0,0,12"
+                             md:HintAssist.Hint="Notes (optional)"
+                             Text="{Binding KioskNotes, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             Padding="8,4" FontSize="13" />
+
+                    <Button Content="Clock In"
+                            Command="{Binding ClockInCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            HorizontalAlignment="Left"
+                            Height="40" Width="140" FontSize="14"
+                            IsEnabled="{Binding IsKioskBusy, Converter={StaticResource InverseBooleanConverter}}" />
+
+                    <!-- Error message -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                               Margin="0,12,0,0" FontSize="13"
+                               Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+
+                <!-- STATE 2b: Worker Identified (Clocked In) -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Margin="20">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KioskState}" Value="ClockedIn">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Welcome + Cancel -->
+                    <DockPanel Margin="0,0,0,16">
+                        <Button Content="Cancel" DockPanel.Dock="Right"
+                                Command="{Binding ResetKioskCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                VerticalAlignment="Center" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}">
+                                <Run Text="Welcome, " /><Run Text="{Binding WorkerName}" FontWeight="SemiBold" />
+                            </TextBlock>
+                            <TextBlock Text="Currently clocked in" Opacity="0.6" Margin="0,4,0,0"
+                                       Foreground="#388E3C" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Current punch info -->
+                    <Border Background="{DynamicResource MaterialDesignToolBarBackground}"
+                            CornerRadius="8" Padding="16,12" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Margin="0,0,32,0">
+                                <TextBlock Text="JOB CODE" FontSize="10" Opacity="0.5" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding CurrentJobCodeDisplay}" FontSize="14" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel Margin="0,0,32,0">
+                                <TextBlock Text="CLOCKED IN AT" FontSize="10" Opacity="0.5" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding CurrentClockInDisplay}" FontSize="14" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="ELAPSED" FontSize="10" Opacity="0.5" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ElapsedTime}" FontSize="14" Margin="0,2,0,0"
+                                           FontWeight="SemiBold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Job title if present -->
+                    <TextBlock Margin="0,0,0,12" FontSize="13" Opacity="0.7"
+                               Visibility="{Binding CurrentJobTitle, Converter={StaticResource NullToCollapsedConverter}}">
+                        <Run Text="Job: " /><Run Text="{Binding CurrentJobTitle}" FontWeight="Medium" />
+                    </TextBlock>
+
+                    <TextBox Width="452" Margin="0,0,0,12"
+                             md:HintAssist.Hint="Notes (optional)"
+                             Text="{Binding KioskNotes, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             HorizontalAlignment="Left"
+                             Padding="8,4" FontSize="13" />
+
+                    <!-- Action buttons -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                        <Button Content="Clock Out"
+                                Command="{Binding ClockOutCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Height="40" Width="140" FontSize="14"
+                                Background="#D32F2F"
+                                BorderBrush="#D32F2F"
+                                IsEnabled="{Binding IsKioskBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                        <Button Content="Switch Job Code"
+                                Command="{Binding ToggleSwitchCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Height="40" Margin="12,0,0,0" FontSize="14"
+                                IsEnabled="{Binding IsKioskBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                    </StackPanel>
+
+                    <!-- Switch Job Code panel -->
+                    <StackPanel Margin="0,16,0,0"
+                                Visibility="{Binding IsSwitching, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="Switch to:" FontSize="13" FontWeight="Medium" Margin="0,0,0,8" Opacity="0.7" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ComboBox Width="220"
+                                      md:HintAssist.Hint="New Job Code (required)"
+                                      ItemsSource="{Binding JobCodes}"
+                                      SelectedItem="{Binding SwitchJobCode}"
+                                      DisplayMemberPath="DisplayName"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Padding="8,4" FontSize="13"
+                                      Margin="0,0,12,0" />
+                            <ComboBox Width="220"
+                                      md:HintAssist.Hint="Job (optional)"
+                                      ItemsSource="{Binding ActiveJobs}"
+                                      SelectedItem="{Binding SwitchJob}"
+                                      DisplayMemberPath="Title"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Padding="8,4" FontSize="13" />
+                        </StackPanel>
+                        <TextBox Width="452" Margin="0,0,0,8"
+                                 md:HintAssist.Hint="Notes for new punch (optional)"
+                                 Text="{Binding SwitchNotes, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 HorizontalAlignment="Left"
+                                 Padding="8,4" FontSize="13" />
+                        <Button Content="Switch Job Code"
+                                Command="{Binding SwitchJobCodeCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                HorizontalAlignment="Left"
+                                Height="40" FontSize="14"
+                                IsEnabled="{Binding IsKioskBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                    </StackPanel>
+
+                    <!-- Error message -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                               Margin="0,12,0,0" FontSize="13"
+                               Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <!-- Success message (switch confirmation) -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="#388E3C" FontSize="13" FontWeight="Medium"
+                               Margin="0,12,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsError}" Value="False" />
+                                            <Condition Binding="{Binding StatusMessage, Converter={StaticResource NotNullToBoolConverter}}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- STATE 3: Success Confirmation -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KioskState}" Value="Success">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <md:PackIcon Kind="CheckCircle" Width="48" Height="48"
+                                 HorizontalAlignment="Center" Margin="0,0,0,12"
+                                 Foreground="#388E3C" />
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               HorizontalAlignment="Center"
+                               Foreground="#388E3C" />
+                </StackPanel>
+
+            </Grid>
+        </md:Card>
+
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- BOTTOM: History                                -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <md:Card Grid.Row="2" Padding="16">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Punch History"
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                           Margin="0,0,0,12" />
+
+                <!-- Filters -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                    <ComboBox Width="170"
+                              md:HintAssist.Hint="Worker"
+                              ItemsSource="{Binding Workers}"
+                              SelectedItem="{Binding WorkerFilter}"
+                              DisplayMemberPath="FullName"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              Padding="8,4" FontSize="13"
+                              Margin="0,0,12,0" />
+                    <ComboBox Width="200"
+                              md:HintAssist.Hint="Job Code"
+                              ItemsSource="{Binding JobCodes}"
+                              SelectedItem="{Binding JobCodeFilter}"
+                              DisplayMemberPath="DisplayName"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              Padding="8,4" FontSize="13"
+                              Margin="0,0,12,0" />
+                    <DatePicker Width="140"
+                                md:HintAssist.Hint="From"
+                                SelectedDate="{Binding FromDate}"
+                                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                Padding="8,4" FontSize="13"
+                                Margin="0,0,12,0" />
+                    <DatePicker Width="140"
+                                md:HintAssist.Hint="To"
+                                SelectedDate="{Binding ToDate}"
+                                Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                Padding="8,4" FontSize="13"
+                                Margin="0,0,12,0" />
+                    <Button Content="Clear"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Click="OnClearFilters"
+                            VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- DataGrid -->
+                <DataGrid ItemsSource="{Binding PunchHistory}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          AlternationCount="2"
+                          AlternatingRowBackground="#0A455A64">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Worker" Binding="{Binding WorkerName}" Width="1.5*" />
+                        <DataGridTextColumn Header="Job Code" Binding="{Binding JobCodeDisplay}" Width="1.5*" />
+                        <DataGridTextColumn Header="Job" Binding="{Binding JobTitle}" Width="1.5*" />
+                        <DataGridTextColumn Header="Clock In" Binding="{Binding ClockIn, StringFormat=g}" Width="1.5*" />
+                        <DataGridTextColumn Header="Clock Out" Binding="{Binding ClockOut, StringFormat=g}" Width="1.5*" />
+                        <DataGridTextColumn Header="Duration" Binding="{Binding TotalHoursDisplay}" Width="*" />
+                        <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="2*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </md:Card>
+
+    </Grid>
+</UserControl>

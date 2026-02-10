@@ -257,6 +257,36 @@ public partial class ClientsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task RecordPaymentAsync()
+    {
+        if (SelectedClientInvoice is null) return;
+
+        var invoice = await _apiClient.GetAsync<InvoiceModel>($"/invoices/{SelectedClientInvoice.Id}");
+        if (invoice is null) return;
+
+        var vm = new InvoiceFormViewModel(_apiClient, invoice);
+        var dialog = new InvoiceFormDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            await LoadDetailDataAsync();
+        }
+    }
+
+    public bool CanRecordPayment => SelectedClientInvoice is not null
+        && SelectedClientInvoice.Status is not ("Paid" or "Cancelled" or "Draft")
+        && SelectedClientInvoice.Amount > 0;
+
+    partial void OnSelectedClientInvoiceChanged(InvoiceModel? value)
+    {
+        OnPropertyChanged(nameof(CanRecordPayment));
+    }
+
+    [RelayCommand]
     private async Task DeleteInvoiceAsync()
     {
         if (SelectedClientInvoice is null) return;

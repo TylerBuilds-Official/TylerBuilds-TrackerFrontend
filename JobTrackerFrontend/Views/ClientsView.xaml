@@ -374,6 +374,15 @@
                                   IsReadOnly="True"
                                   CanUserAddRows="False"
                                   SelectionMode="Single">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Record Payment" Command="{Binding RecordPaymentCommand}"
+                                              IsEnabled="{Binding CanRecordPayment}" />
+                                    <MenuItem Header="Open Invoice File" Command="{Binding OpenInvoiceFileCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="Delete" Command="{Binding DeleteInvoiceCommand}" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
                                 <DataGridTextColumn Header="Job" Binding="{Binding JobTitle}" Width="2*" />

@@ -30,6 +30,12 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private string _chartTitle = "";
     [ObservableProperty] private bool _hasChartData;
 
+    // Weekly Hours chart
+    [ObservableProperty] private ISeries[] _weeklyHoursSeries = [];
+    [ObservableProperty] private Axis[] _weeklyHoursXAxes = [];
+    [ObservableProperty] private Axis[] _weeklyHoursYAxes = [];
+    [ObservableProperty] private bool _hasWeeklyHoursData;
+
     public DashboardViewModel(ApiClient apiClient, ThemeService themeService)
     {
         _apiClient = apiClient;
@@ -52,6 +58,7 @@ public partial class DashboardViewModel : ObservableObject
             RecentActivity = new ObservableCollection<RecentActivityModel>(activityData ?? []);
 
             await LoadIncomeChartAsync();
+            await LoadWeeklyHoursAsync();
         }
         catch (Exception ex)
         {
@@ -161,6 +168,90 @@ public partial class DashboardViewModel : ObservableObject
         catch
         {
             HasChartData = false;
+        }
+    }
+
+    private async Task LoadWeeklyHoursAsync()
+    {
+        try
+        {
+            var today = DateTime.Today;
+            var monday = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+            if (today.DayOfWeek == DayOfWeek.Sunday) monday = monday.AddDays(-7);
+            var sunday = monday.AddDays(6);
+
+            var url = $"/timeclock/summary?from_date={monday:yyyy-MM-dd}&to_date={sunday:yyyy-MM-dd}";
+            var data = await _apiClient.GetAsync<List<JobCodeSummaryModel>>(url) ?? [];
+
+            if (data.Count == 0)
+            {
+                WeeklyHoursSeries = [];
+                HasWeeklyHoursData = false;
+                return;
+            }
+
+            var labels = data.Select(d => TruncateLabel(d.DisplayName, 20)).ToArray();
+            var hours = data.Select(d => d.TotalHours).ToArray();
+
+            var isDark = _themeService.IsDarkMode;
+            var textColor = isDark ? new SKColor(176, 190, 197) : new SKColor(84, 110, 122);
+            var mutedColor = isDark ? new SKColor(120, 144, 156) : new SKColor(144, 164, 174);
+            var gridColor = isDark ? new SKColor(55, 71, 79, 100) : new SKColor(176, 190, 197, 80);
+
+            // Color palette for bars
+            var colors = new SKColor[]
+            {
+                new(38, 166, 154),   // Teal
+                new(66, 165, 245),   // Blue
+                new(255, 167, 38),   // Orange
+                new(126, 87, 194),   // Purple
+                new(239, 83, 80),    // Red
+                new(102, 187, 106),  // Green
+                new(255, 202, 40),   // Yellow
+            };
+
+            WeeklyHoursSeries =
+            [
+                new RowSeries<double>
+                {
+                    Values = hours,
+                    Fill = new SolidColorPaint(colors[0]),
+                    MaxBarWidth = 28,
+                },
+            ];
+
+            WeeklyHoursXAxes =
+            [
+                new Axis
+                {
+                    Labeler = value => $"{value:F1}h",
+                    TextSize = 11,
+                    LabelsPaint = new SolidColorPaint(mutedColor),
+                    SeparatorsPaint = new SolidColorPaint(gridColor)
+                    {
+                        StrokeThickness = 1,
+                        PathEffect = new DashEffect([4, 4]),
+                    },
+                    MinLimit = 0,
+                },
+            ];
+
+            WeeklyHoursYAxes =
+            [
+                new Axis
+                {
+                    Labels = labels,
+                    TextSize = 12,
+                    LabelsPaint = new SolidColorPaint(textColor),
+                    SeparatorsPaint = null,
+                },
+            ];
+
+            HasWeeklyHoursData = true;
+        }
+        catch
+        {
+            HasWeeklyHoursData = false;
         }
     }
 

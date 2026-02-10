@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -122,8 +123,27 @@
             </DockPanel>
         </md:Card>
 
+        <!-- Hours This Week -->
+        <md:Card Grid.Row="3" Margin="0,0,0,24" Padding="20"
+                 Visibility="{Binding HasWeeklyHoursData, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Hours This Week"
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                           Margin="0,0,0,4" />
+                <lvc:CartesianChart Height="200"
+                                    Series="{Binding WeeklyHoursSeries}"
+                                    XAxes="{Binding WeeklyHoursXAxes}"
+                                    YAxes="{Binding WeeklyHoursYAxes}"
+                                    TooltipPosition="Hidden"
+                                    LegendPosition="Hidden"
+                                    AnimationsSpeed="00:00:00.3"
+                                    Margin="0,8,0,0" />
+            </DockPanel>
+        </md:Card>
+
         <!-- Pipeline + Recent Activity -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />

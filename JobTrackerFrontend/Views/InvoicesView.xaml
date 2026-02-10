@@ -93,6 +93,8 @@
                     </MenuItem>
                     <Separator />
                     <MenuItem Header="Edit" Command="{Binding EditInvoiceCommand}" />
+                    <MenuItem Header="Record Payment" Command="{Binding RecordPaymentCommand}"
+                              IsEnabled="{Binding CanRecordPayment}" />
                     <MenuItem Header="Open Invoice File" Command="{Binding OpenInvoiceFileCommand}" />
                     <Separator />
                     <MenuItem Header="Delete" Command="{Binding DeleteInvoiceCommand}" />

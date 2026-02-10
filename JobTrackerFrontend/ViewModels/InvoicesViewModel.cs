@@ -149,4 +149,20 @@ public partial class InvoicesViewModel : ObservableObject
             await LoadDataAsync();
         }
     }
+
+    [RelayCommand]
+    private async Task RecordPaymentAsync()
+    {
+        // Opens the edit dialog — payment section is already built in
+        await EditInvoiceAsync();
+    }
+
+    public bool CanRecordPayment => SelectedInvoice is not null
+        && SelectedInvoice.Status is not ("Paid" or "Cancelled" or "Draft")
+        && SelectedInvoice.Amount > 0;
+
+    partial void OnSelectedInvoiceChanged(InvoiceModel? value)
+    {
+        OnPropertyChanged(nameof(CanRecordPayment));
+    }
 }

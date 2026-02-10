@@ -23,12 +23,14 @@ public partial class App : Application
         var clientsVm = new ClientsViewModel(apiClient);
         var jobsVm = new JobsViewModel(apiClient);
         var invoicesVm = new InvoicesViewModel(apiClient);
+        var timeClockVm = new TimeClockViewModel(apiClient);
 
         // Register navigation routes
         navigationService.Register("Dashboard", () => new DashboardView { DataContext = dashboardVm });
         navigationService.Register("Clients", () => new ClientsView { DataContext = clientsVm });
         navigationService.Register("Jobs", () => new JobsView { DataContext = jobsVm });
         navigationService.Register("Invoices", () => new InvoicesView { DataContext = invoicesVm });
+        navigationService.Register("Time Clock", () => new TimeClockView { DataContext = timeClockVm });
 
         // Main Window
         var mainVm = new MainWindowViewModel(navigationService, authService, themeService);

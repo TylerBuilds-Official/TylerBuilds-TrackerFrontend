@@ -2,11 +2,11 @@
 
 ## High Priority
 - [ ] **Invoice Line Items UI** — DB and API already support line items; build UI in InvoiceFormDialog to add/edit/remove itemized rows (description, quantity, unit price). Required before invoice template auto-fill is useful.
-- [ ] **Overdue Auto-Detection** — Invoices past their due date should automatically flip to "Overdue." Either scan on dashboard load or run a scheduled background check.
+- [x] **Overdue Auto-Detection** — Invoices past their due date should automatically flip to "Overdue." Either scan on dashboard load or run a scheduled background check.
 - [ ] **Expense / Cost Tracking** — Log costs against a job (materials, subcontractors, software, etc.) to calculate profit, not just revenue. Needs DB table, API endpoints, and job detail UI.
 
 ## High Priority (New Feature)
-- [ ] **Time Clock Tab** — New top-level tab with a punch-in/punch-out system. Job codes to associate punches with specific jobs, passcode entry for authentication, and time tracking visible on the dashboard. Needs DB tables (TimePunch, job code associations), API endpoints, dedicated UI tab, and dashboard integration.
+- [x] **Time Clock Tab** — New top-level tab with a punch-in/punch-out system. Job codes to associate punches with specific jobs, passcode entry for authentication, and time tracking visible on the dashboard. Needs DB tables (TimePunch, job code associations), API endpoints, dedicated UI tab, and dashboard integration.
 
 ## Medium Priority
 - [ ] **Dashboard Revenue Period Filter** — Summary cards are currently all-time. Add month/quarter/year filtering so the numbers reflect a meaningful time window.
