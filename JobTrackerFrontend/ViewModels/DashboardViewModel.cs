@@ -22,6 +22,9 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string? _errorMessage;
 
+    // Revenue period filter
+    [ObservableProperty] private string _revenuePeriod = "This Month";
+
     // Chart
     [ObservableProperty] private ISeries[] _incomeChartSeries = [];
     [ObservableProperty] private Axis[] _incomeXAxes = [];
@@ -49,7 +52,7 @@ public partial class DashboardViewModel : ObservableObject
         ErrorMessage = null;
         try
         {
-            RevenueSummary = await _apiClient.GetAsync<RevenueSummaryModel>("/dashboard/revenue-summary");
+            await LoadRevenueSummaryAsync();
 
             var pipelineData = await _apiClient.GetAsync<List<JobPipelineModel>>("/dashboard/job-pipeline");
             Pipeline = new ObservableCollection<JobPipelineModel>(pipelineData ?? []);
@@ -69,6 +72,39 @@ public partial class DashboardViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    private async Task LoadRevenueSummaryAsync()
+    {
+        try
+        {
+            var (from, to) = GetRevenueDateRange();
+            var query = new List<string>();
+            if (from is not null) query.Add($"dateFrom={from:yyyy-MM-dd}");
+            if (to is not null) query.Add($"dateTo={to:yyyy-MM-dd}");
+            var endpoint = query.Count > 0
+                ? $"/dashboard/revenue-summary?{string.Join("&", query)}"
+                : "/dashboard/revenue-summary";
+            RevenueSummary = await _apiClient.GetAsync<RevenueSummaryModel>(endpoint);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to load revenue: {ex.Message}";
+        }
+    }
+
+    private (DateTime? from, DateTime? to) GetRevenueDateRange()
+    {
+        var today = DateTime.Today;
+        return RevenuePeriod switch
+        {
+            "This Month" => (new DateTime(today.Year, today.Month, 1), today),
+            "This Year" => (new DateTime(today.Year, 1, 1), today),
+            "Last Year" => (new DateTime(today.Year - 1, 1, 1), new DateTime(today.Year - 1, 12, 31)),
+            _ => (null, null) // All-time
+        };
+    }
+
+    partial void OnRevenuePeriodChanged(string value) => _ = LoadRevenueSummaryAsync();
 
     [RelayCommand]
     private async Task SetMonthViewAsync()

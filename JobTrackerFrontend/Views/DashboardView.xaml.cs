@@ -18,4 +18,12 @@ public partial class DashboardView : UserControl
             await vm.LoadDataCommand.ExecuteAsync(null);
         }
     }
+
+    private void OnRevenuePeriodChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is RadioButton rb && rb.Tag is string period && DataContext is DashboardViewModel vm)
+        {
+            vm.RevenuePeriod = period;
+        }
+    }
 }

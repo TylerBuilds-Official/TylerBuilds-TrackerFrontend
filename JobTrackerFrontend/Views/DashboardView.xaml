@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -29,8 +30,39 @@
                      Background="Transparent"
                      BorderThickness="0" />
 
+        <!-- Revenue Header + Period Filter -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,8">
+            <TextBlock Text="Revenue"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                       VerticalAlignment="Center" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <RadioButton Content="This Month" GroupName="RevenuePeriod"
+                             IsChecked="True"
+                             Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                             Checked="OnRevenuePeriodChanged"
+                             Tag="This Month"
+                             Padding="10,5" FontSize="12" Cursor="Hand" />
+                <RadioButton Content="This Year" GroupName="RevenuePeriod"
+                             Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                             Checked="OnRevenuePeriodChanged"
+                             Tag="This Year"
+                             Padding="10,5" FontSize="12" Cursor="Hand" />
+                <RadioButton Content="Last Year" GroupName="RevenuePeriod"
+                             Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                             Checked="OnRevenuePeriodChanged"
+                             Tag="Last Year"
+                             Padding="10,5" FontSize="12" Cursor="Hand" />
+                <RadioButton Content="All-time" GroupName="RevenuePeriod"
+                             Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                             Checked="OnRevenuePeriodChanged"
+                             Tag="All-time"
+                             Padding="10,5" FontSize="12" Cursor="Hand" />
+            </StackPanel>
+        </DockPanel>
+
         <!-- Revenue Cards -->
-        <Grid Grid.Row="1" Margin="0,0,0,24">
+        <Grid Grid.Row="2" Margin="0,0,0,24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -82,7 +114,7 @@
         </Grid>
 
         <!-- Income by Job Chart -->
-        <md:Card Grid.Row="2" Margin="0,0,0,24" Padding="20">
+        <md:Card Grid.Row="3" Margin="0,0,0,24" Padding="20">
             <DockPanel>
                 <!-- Header row -->
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
@@ -124,7 +156,7 @@
         </md:Card>
 
         <!-- Hours This Week -->
-        <md:Card Grid.Row="3" Margin="0,0,0,24" Padding="20"
+        <md:Card Grid.Row="4" Margin="0,0,0,24" Padding="20"
                  Visibility="{Binding HasWeeklyHoursData, Converter={StaticResource BooleanToVisibilityConverter}}">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top"
@@ -143,7 +175,7 @@
         </md:Card>
 
         <!-- Pipeline + Recent Activity -->
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
