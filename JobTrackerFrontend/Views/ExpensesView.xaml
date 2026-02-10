@@ -1,0 +1,213 @@
+<UserControl x:Class="JobTrackerFrontend.Views.ExpensesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+             d:DataContext="{d:DesignInstance vm:ExpensesViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Loaded="OnLoaded">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     Height="2" Margin="0,0,0,4"
+                     Background="Transparent" BorderThickness="0" />
+
+        <!-- Header Buttons -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Right"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Content="View Receipt"
+                        Command="{Binding OpenReceiptCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedExpense.ReceiptFilePath, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Delete"
+                        Command="{Binding DeleteExpenseCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedExpense, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Edit"
+                        Command="{Binding EditExpenseCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedExpense, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="New Expense"
+                        Command="{Binding NewExpenseCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Summary Cards -->
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <md:Card Grid.Column="0" Margin="0,0,6,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="This Month"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Opacity="0.6" />
+                    <TextBlock Text="{Binding Summary.ThisMonthTotal, StringFormat=C}"
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                               Margin="0,8,0,0" />
+                </StackPanel>
+            </md:Card>
+            <md:Card Grid.Column="1" Margin="6,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Reimbursable"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Opacity="0.6" />
+                    <TextBlock Text="{Binding Summary.ThisMonthReimbursable, StringFormat=C}"
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                               Foreground="{DynamicResource PrimaryHueMidBrush}"
+                               Margin="0,8,0,0" />
+                </StackPanel>
+            </md:Card>
+            <md:Card Grid.Column="2" Margin="6,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Net Expenses"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Opacity="0.6" />
+                    <TextBlock Text="{Binding Summary.ThisMonthNet, StringFormat=C}"
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                               Margin="0,8,0,0" />
+                </StackPanel>
+            </md:Card>
+            <md:Card Grid.Column="3" Margin="6,0,0,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Year to Date"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Opacity="0.6" />
+                    <TextBlock Text="{Binding Summary.YearToDateTotal, StringFormat=C}"
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                               Margin="0,8,0,0" />
+                </StackPanel>
+            </md:Card>
+        </Grid>
+
+        <!-- Filters -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,12">
+            <ComboBox Width="130"
+                      md:HintAssist.Hint="Date Range"
+                      ItemsSource="{Binding DateRangeOptions}"
+                      SelectedItem="{Binding DateRangeFilter}"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13" />
+
+            <ComboBox Width="180"
+                      md:HintAssist.Hint="Category"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding CategoryFilter}"
+                      DisplayMemberPath="Name"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13"
+                      Margin="8,0,0,0" />
+
+            <ComboBox Width="200"
+                      md:HintAssist.Hint="Job"
+                      ItemsSource="{Binding JobFilterItems}"
+                      SelectedItem="{Binding JobFilter}"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13"
+                      Margin="8,0,0,0" />
+
+            <ComboBox Width="130"
+                      md:HintAssist.Hint="Reimbursable"
+                      ItemsSource="{Binding ReimbursableOptions}"
+                      SelectedItem="{Binding ReimbursableFilter}"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13"
+                      Margin="8,0,0,0" />
+
+            <Button Command="{Binding ManageCategoriesCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    ToolTip="Manage Categories"
+                    Margin="12,0,0,0" Padding="8,4">
+                <md:PackIcon Kind="CogOutline" Width="18" Height="18" />
+            </Button>
+        </StackPanel>
+
+        <!-- Expenses Grid -->
+        <DataGrid Grid.Row="4"
+                  ItemsSource="{Binding Expenses}"
+                  SelectedItem="{Binding SelectedExpense}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  SelectionMode="Single"
+                  AlternationCount="2"
+                  AlternatingRowBackground="#0A455A64"
+                  MouseDoubleClick="OnRowDoubleClick">
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Edit" Command="{Binding EditExpenseCommand}" />
+                    <MenuItem Header="View Receipt" Command="{Binding OpenReceiptCommand}" />
+                    <Separator />
+                    <MenuItem Header="Delete" Command="{Binding DeleteExpenseCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Date" Binding="{Binding ExpenseDate, StringFormat=d}" Width="*" />
+                <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor}" Width="1.5*" />
+                <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="1.2*" />
+                <DataGridTextColumn Header="Job" Binding="{Binding JobDisplay}" Width="1.5*" />
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                <DataGridTemplateColumn Header="Reimb." Width="0.8*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="8"
+                                    Padding="8,2" Margin="0,2"
+                                    HorizontalAlignment="Left">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#E0E0E0" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsReimbursable}" Value="True">
+                                                <Setter Property="Background" Value="#C8E6C9" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="11" FontWeight="Medium">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="No" />
+                                            <Setter Property="Foreground" Value="#757575" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsReimbursable}" Value="True">
+                                                    <Setter Property="Text" Value="Yes" />
+                                                    <Setter Property="Foreground" Value="#2E7D32" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

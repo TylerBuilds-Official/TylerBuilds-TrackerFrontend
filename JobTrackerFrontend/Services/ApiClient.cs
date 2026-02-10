@@ -62,6 +62,13 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions);
     }
 
+    public async Task PutAsync<TRequest>(string endpoint, TRequest body)
+    {
+        await AttachTokenAsync();
+        var response = await _httpClient.PutAsJsonAsync(endpoint, body, JsonOptions);
+        response.EnsureSuccessStatusCode();
+    }
+
     
     public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string endpoint, TRequest body)
     {

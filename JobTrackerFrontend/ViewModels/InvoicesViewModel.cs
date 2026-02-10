@@ -157,6 +157,25 @@ public partial class InvoicesViewModel : ObservableObject
         await EditInvoiceAsync();
     }
 
+    [RelayCommand]
+    private async Task ManageLineItemsAsync()
+    {
+        if (SelectedInvoice is null) return;
+
+        var vm = new LineItemsManagerViewModel(_apiClient, SelectedInvoice.Id, SelectedInvoice.DisplayNumber);
+        var dialog = new LineItemsManagerDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        dialog.ShowDialog();
+
+        // Refresh if line items were modified (amount may have changed)
+        if (vm.HasChanges)
+            await LoadDataAsync();
+    }
+
     public bool CanRecordPayment => SelectedInvoice is not null
         && SelectedInvoice.Status is not ("Paid" or "Cancelled" or "Draft")
         && SelectedInvoice.Amount > 0;

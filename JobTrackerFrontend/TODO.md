@@ -1,7 +1,7 @@
 # JobTracker — TODO
 
 ## High Priority
-- [ ] **Invoice Line Items UI** — DB and API already support line items; build UI in InvoiceFormDialog to add/edit/remove itemized rows (description, quantity, unit price). Required before invoice template auto-fill is useful.
+- [x] **Invoice Line Items UI** — DB and API already support line items; build UI in InvoiceFormDialog to add/edit/remove itemized rows (description, quantity, unit price). Required before invoice template auto-fill is useful.
 - [x] **Overdue Auto-Detection** — Invoices past their due date should automatically flip to "Overdue." Either scan on dashboard load or run a scheduled background check.
 - [ ] **Expense / Cost Tracking** — Log costs against a job (materials, subcontractors, software, etc.) to calculate profit, not just revenue. Needs DB table, API endpoints, and job detail UI.
 
@@ -14,6 +14,6 @@
 - [ ] **Job Detail View** — Match the client detail pattern: double-click a job to see linked invoices, expenses, and status history in a tabbed detail page.
 
 ## Lower Priority
-- [ ] **Time Tracking** — For hourly billing jobs, allow logging hours with date, description, and rate. Ties into invoicing and profitability.
+- [x] **Time Tracking** — For hourly billing jobs, allow logging hours with date, description, and rate. Ties into invoicing and profitability.
 - [ ] **Reporting / CSV Export** — Pull data out for tax season or bookkeeping. Revenue by client, revenue by period, outstanding invoices, expense summaries.
 - [ ] **Invoice Template Auto-Fill** — Populate the .docx template with client name, address, invoice number, line items, amounts, and dates on creation.
