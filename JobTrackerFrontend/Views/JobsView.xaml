@@ -6,6 +6,7 @@
              d:DataContext="{d:DesignInstance vm:JobsViewModel}"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:JobTrackerFrontend.Converters"
              mc:Ignorable="d"
              Loaded="OnLoaded">
 
@@ -213,46 +214,197 @@
                 </StackPanel>
             </md:Card>
 
-            <!-- Invoices for this Job -->
+            <!-- Tab header row + action buttons -->
             <Grid Grid.Row="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Invoices"
-                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                           Margin="0,0,0,8" />
+                <!-- Tab header bar -->
+                <DockPanel Grid.Row="0">
+                    <!-- Action buttons docked right -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                        <!-- Invoices tab buttons -->
+                        <Button Content="Open Invoice" Command="{Binding OpenJobInvoiceFileCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedJobInvoice, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Delete" Command="{Binding DeleteJobInvoiceCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedJobInvoice, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Add Invoice" Command="{Binding NewJobInvoiceCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="0" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
 
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding JobInvoices}"
-                          SelectedItem="{Binding SelectedJobInvoice}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserAddRows="False"
-                          SelectionMode="Single"
-                          >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
-                        <DataGridTemplateColumn Header="Status" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border CornerRadius="8"
-                                            Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
-                                            Padding="8,2" Margin="0,2"
-                                            HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Status}"
-                                                   Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
-                                                   FontSize="11" FontWeight="Medium" />
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
-                        <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
-                        <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                        <!-- Expenses tab buttons -->
+                        <Button Content="Edit" Command="{Binding EditJobExpenseCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedJobExpense, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="1" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Delete" Command="{Binding DeleteJobExpenseCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0" Margin="0,0,6,0"
+                                IsEnabled="{Binding SelectedJobExpense, Converter={StaticResource NotNullToBoolConverter}}">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="1" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                        <Button Content="Add Expense" Command="{Binding NewJobExpenseCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Padding="10,3" FontSize="12" Height="Auto" MinWidth="0">
+                            <Button.Visibility>
+                                <Binding ElementName="DetailTabs" Path="SelectedIndex">
+                                    <Binding.Converter>
+                                        <converters:IndexToVisibilityConverter TargetIndex="1" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Button.Visibility>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Tab buttons -->
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Invoices" GroupName="JobDetailTab"
+                                     IsChecked="True"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Checked="TabRadio_Checked" Tag="0"
+                                     Padding="16,8" FontSize="13" FontWeight="Medium" Cursor="Hand" />
+                        <RadioButton Content="Expenses" GroupName="JobDetailTab"
+                                     Style="{StaticResource MaterialDesignTabRadioButtonBottom}"
+                                     Checked="TabRadio_Checked" Tag="1"
+                                     Padding="16,8" FontSize="13" FontWeight="Medium" Cursor="Hand" />
+                    </StackPanel>
+                </DockPanel>
+
+                <!-- Tab content (headers removed via template) -->
+                <TabControl x:Name="DetailTabs" Grid.Row="1" SelectedIndex="0">
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <ContentPresenter ContentSource="SelectedContent" />
+                        </ControlTemplate>
+                    </TabControl.Template>
+
+                    <!-- ── Invoices Tab ── -->
+                    <TabItem>
+                        <DataGrid Margin="0,12,0,0"
+                                  ItemsSource="{Binding JobInvoices}"
+                                  SelectedItem="{Binding SelectedJobInvoice}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Invoice #" Binding="{Binding DisplayNumber}" Width="1.5*" />
+                                <DataGridTemplateColumn Header="Status" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8"
+                                                    Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"
+                                                    Padding="8,2" Margin="0,2"
+                                                    HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Status}"
+                                                           Foreground="{Binding Status, Converter={StaticResource StatusToForegroundConverter}}"
+                                                           FontSize="11" FontWeight="Medium" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                <DataGridTextColumn Header="Due Date" Binding="{Binding DueDate, StringFormat=d}" Width="*" />
+                                <DataGridTextColumn Header="Paid Date" Binding="{Binding PaidDate, StringFormat=d}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+
+                    <!-- ── Expenses Tab ── -->
+                    <TabItem>
+                        <DataGrid Margin="0,12,0,0"
+                                  ItemsSource="{Binding JobExpenses}"
+                                  SelectedItem="{Binding SelectedJobExpense}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding ExpenseDate, StringFormat=d}" Width="*" />
+                                <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor}" Width="1.5*" />
+                                <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="1.2*" />
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*" />
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=C}" Width="*" />
+                                <DataGridTemplateColumn Header="Reimb." Width="0.7*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="8" Padding="8,2" Margin="0,2" HorizontalAlignment="Left">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#E0E0E0" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsReimbursable}" Value="True">
+                                                                <Setter Property="Background" Value="#C8E6C9" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock FontSize="11" FontWeight="Medium">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="No" />
+                                                            <Setter Property="Foreground" Value="#757575" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsReimbursable}" Value="True">
+                                                                    <Setter Property="Text" Value="Yes" />
+                                                                    <Setter Property="Foreground" Value="#2E7D32" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                </TabControl>
             </Grid>
         </Grid>
 

@@ -64,6 +64,14 @@ public partial class InvoiceFormViewModel : ObservableObject
         _preSelectedClientId = clientId;
     }
 
+    /// <summary>Create mode with pre-selected job.</summary>
+    public InvoiceFormViewModel(ApiClient apiClient, int jobId, bool isJobPreselect)
+    {
+        _apiClient = apiClient;
+        _editingId = null;
+        _initialJobId = jobId;
+    }
+
     /// <summary>Edit mode — populate from existing invoice.</summary>
     public InvoiceFormViewModel(ApiClient apiClient, InvoiceModel invoice)
     {

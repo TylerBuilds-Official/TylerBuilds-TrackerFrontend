@@ -47,6 +47,14 @@ public partial class ExpenseFormViewModel : ObservableObject
         _editingId = null;
     }
 
+    /// <summary>Create mode with pre-selected job.</summary>
+    public ExpenseFormViewModel(ApiClient apiClient, int jobId)
+    {
+        _apiClient = apiClient;
+        _editingId = null;
+        _initialJobId = jobId;
+    }
+
     /// <summary>Edit mode — populate from existing expense.</summary>
     public ExpenseFormViewModel(ApiClient apiClient, ExpenseModel expense)
     {

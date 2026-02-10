@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,6 +26,8 @@ public partial class JobsViewModel : ObservableObject
     [ObservableProperty] private JobModel? _detailJob;
     [ObservableProperty] private ObservableCollection<InvoiceModel> _jobInvoices = [];
     [ObservableProperty] private InvoiceModel? _selectedJobInvoice;
+    [ObservableProperty] private ObservableCollection<ExpenseModel> _jobExpenses = [];
+    [ObservableProperty] private ExpenseModel? _selectedJobExpense;
 
     public List<string> Statuses { get; } = ["Lead", "Proposal", "Active", "Completed", "Invoiced"];
 
@@ -68,7 +72,7 @@ public partial class JobsViewModel : ObservableObject
 
         DetailJob = job;
         IsDetailMode = true;
-        await LoadJobInvoicesAsync();
+        await LoadJobDetailDataAsync();
     }
 
     [RelayCommand]
@@ -77,20 +81,142 @@ public partial class JobsViewModel : ObservableObject
         IsDetailMode = false;
         DetailJob = null;
         JobInvoices = [];
+        JobExpenses = [];
         await LoadDataAsync();
     }
 
-    private async Task LoadJobInvoicesAsync()
+    private async Task LoadJobDetailDataAsync()
     {
         if (DetailJob is null) return;
         try
         {
-            var data = await _apiClient.GetAsync<List<InvoiceModel>>($"/invoices/by-job/{DetailJob.Id}");
-            JobInvoices = new ObservableCollection<InvoiceModel>(data ?? []);
+            var invoices = await _apiClient.GetAsync<List<InvoiceModel>>($"/invoices/by-job/{DetailJob.Id}");
+            JobInvoices = new ObservableCollection<InvoiceModel>(invoices ?? []);
+
+            var expenses = await _apiClient.GetAsync<List<ExpenseModel>>($"/expenses/by-job/{DetailJob.Id}");
+            JobExpenses = new ObservableCollection<ExpenseModel>(expenses ?? []);
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Failed to load invoices: {ex.Message}";
+            ErrorMessage = $"Failed to load detail data: {ex.Message}";
+        }
+    }
+
+    // ── Invoice Tab Actions ────────────────────────────────
+
+    [RelayCommand]
+    private async Task NewJobInvoiceAsync()
+    {
+        if (DetailJob is null) return;
+
+        var vm = new InvoiceFormViewModel(_apiClient, DetailJob.Id, isJobPreselect: true);
+        var dialog = new InvoiceFormDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+            await LoadJobDetailDataAsync();
+    }
+
+    [RelayCommand]
+    private void OpenJobInvoiceFile()
+    {
+        if (SelectedJobInvoice is null || string.IsNullOrEmpty(SelectedJobInvoice.NetworkFilePath))
+            return;
+
+        if (!File.Exists(SelectedJobInvoice.NetworkFilePath))
+        {
+            MessageBox.Show("Invoice file not found.", "Error");
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo(SelectedJobInvoice.NetworkFilePath) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private async Task DeleteJobInvoiceAsync()
+    {
+        if (SelectedJobInvoice is null) return;
+
+        var result = MessageBox.Show(
+            $"Delete invoice {SelectedJobInvoice.DisplayNumber}?\n\nThis action cannot be undone.",
+            "Delete Invoice",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
+        {
+            await _apiClient.DeleteAsync($"/invoices/{SelectedJobInvoice.Id}");
+            await LoadJobDetailDataAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to delete invoice: {ex.Message}", "Error");
+        }
+    }
+
+    // ── Expense Tab Actions ────────────────────────────────
+
+    [RelayCommand]
+    private async Task NewJobExpenseAsync()
+    {
+        if (DetailJob is null) return;
+
+        var vm = new ExpenseFormViewModel(_apiClient, DetailJob.Id);
+        var dialog = new ExpenseFormDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+            await LoadJobDetailDataAsync();
+    }
+
+    [RelayCommand]
+    private async Task EditJobExpenseAsync()
+    {
+        if (SelectedJobExpense is null) return;
+
+        var fresh = await _apiClient.GetAsync<ExpenseModel>($"/expenses/{SelectedJobExpense.Id}");
+        if (fresh is null) return;
+
+        var vm = new ExpenseFormViewModel(_apiClient, fresh);
+        var dialog = new ExpenseFormDialog
+        {
+            DataContext = vm,
+            Owner = Application.Current.MainWindow
+        };
+
+        if (dialog.ShowDialog() == true)
+            await LoadJobDetailDataAsync();
+    }
+
+    [RelayCommand]
+    private async Task DeleteJobExpenseAsync()
+    {
+        if (SelectedJobExpense is null) return;
+
+        var result = MessageBox.Show(
+            $"Delete expense?\n\n{SelectedJobExpense.Vendor} — {SelectedJobExpense.Amount:C}\n\nThis action cannot be undone.",
+            "Delete Expense",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
+        {
+            await _apiClient.DeleteAsync($"/expenses/{SelectedJobExpense.Id}");
+            await LoadJobDetailDataAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to delete expense: {ex.Message}", "Error");
         }
     }
 
@@ -162,7 +288,7 @@ public partial class JobsViewModel : ObservableObject
             if (IsDetailMode)
             {
                 DetailJob = await _apiClient.GetAsync<JobModel>($"/jobs/{job.Id}");
-                await LoadJobInvoicesAsync();
+                await LoadJobDetailDataAsync();
             }
             else
             {
