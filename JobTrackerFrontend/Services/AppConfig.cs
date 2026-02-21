@@ -17,6 +17,8 @@ public class AppConfig
     // API
     public static string ApiBaseUrl => Configuration["Api:BaseUrl"] ?? "";
 
+    public static string DevApiBaseUrl => Configuration["DevApi:BaseUrl"] ?? "";
+
     // Azure AD
     public static string TenantId => Configuration["AzureAd:TenantId"] ?? "";
     public static string ClientId => Configuration["AzureAd:ClientId"] ?? "";
