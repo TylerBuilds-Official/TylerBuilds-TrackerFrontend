@@ -22,9 +22,15 @@ public class ApiClient
     public ApiClient(AuthService authService)
     {
         _authService = authService;
-        _httpClient = new HttpClient
+        var handler = new SocketsHttpHandler
         {
-            BaseAddress = new Uri(AppConfig.ApiBaseUrl)
+            MaxConnectionsPerServer = 20,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+        };
+        _httpClient = new HttpClient(handler)
+        {
+            BaseAddress = new Uri(AppConfig.ApiBaseUrl),
+            Timeout     = TimeSpan.FromSeconds(15)
         };
     }
 

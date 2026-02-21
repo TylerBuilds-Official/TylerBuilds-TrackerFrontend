@@ -7,6 +7,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
+        Icon="assets/TBTrackerIcon_32.ico"
         Title="TylerBuilds | JobTracker"
         Height="800" Width="1280"
         MinHeight="600" MinWidth="900"
@@ -164,7 +165,7 @@
                         <md:PackIcon Kind="Menu" Width="20" Height="20" />
                     </Button>
 
-                    <!-- Bottom: User + Logout -->
+                    <!-- Bottom: User + Logout + Version -->
                     <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
                         <Separator Style="{StaticResource NavSeparatorStyle}" />
                         <Button Command="{Binding LogoutCommand}"
@@ -178,6 +179,12 @@
                                            Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </StackPanel>
                         </Button>
+                        <TextBlock Margin="16,4,0,0"
+                                   FontSize="10"
+                                   Opacity="0.4"
+                                   Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Run Text="v" /><Run Text="{Binding AppVersion, Mode=OneWay}" />
+                        </TextBlock>
                     </StackPanel>
 
                     <!-- Nav Items -->
@@ -351,6 +358,7 @@
             <Grid Grid.Column="1" ClipToBounds="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -410,8 +418,61 @@
                     </DockPanel>
                 </Border>
 
+                <!-- Update Notification Bar -->
+                <Border Grid.Row="1"
+                        Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Margin="24,8,24,0"
+                        Padding="12,8"
+                        CornerRadius="4">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#E8F5E9" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                    <Setter Property="Background" Value="#1B3A1F" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                Content="Dismiss"
+                                Command="{Binding DismissUpdateCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Foreground="#66BB6A"
+                                Margin="8,0,0,0"
+                                Padding="8,4" />
+                        <Button DockPanel.Dock="Right"
+                                Content="Restart Now"
+                                Command="{Binding ApplyUpdateCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Foreground="#2E7D32"
+                                FontWeight="SemiBold"
+                                Padding="8,4" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <md:PackIcon Kind="Update" Width="18" Height="18"
+                                         Foreground="#43A047"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0" />
+                            <TextBlock VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
+                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                                <Setter Property="Foreground" Value="#81C784" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <Run Text="Update available: v" /><Run Text="{Binding UpdateVersion, Mode=OneWay}" /><Run Text=" — ready to install" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
                 <!-- Dynamic Content -->
-                <ContentControl Grid.Row="1"
+                <ContentControl Grid.Row="2"
                                 Content="{Binding Navigation.CurrentView}" />
             </Grid>
         </Grid>

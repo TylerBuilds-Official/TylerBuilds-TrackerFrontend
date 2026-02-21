@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using JobTrackerFrontend.Services;
+using Velopack;
 
 namespace JobTrackerFrontend.ViewModels;
 
@@ -9,6 +10,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly NavigationService _navigationService;
     private readonly AuthService _authService;
     private readonly ThemeService _themeService;
+    private readonly UpdateManager? _updateManager;
 
     [ObservableProperty] private string _userName = "";
     [ObservableProperty] private bool _isNavExpanded = true;
@@ -17,16 +19,30 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _authStatusMessage = "Checking for previous session...";
     [ObservableProperty] private string _selectedNavItem = "Dashboard";
     [ObservableProperty] private bool _staySignedIn = true;
-
-    public NavigationService Navigation => _navigationService;
-
     [ObservableProperty] private bool _isDarkMode;
 
-    public MainWindowViewModel(NavigationService navigationService, AuthService authService, ThemeService themeService)
+    // Update state
+    [ObservableProperty] private bool _isUpdateAvailable;
+    [ObservableProperty] private string _updateVersion = "";
+    [ObservableProperty] private bool _isDownloadingUpdate;
+
+    private UpdateInfo? _pendingUpdate;
+
+    public NavigationService Navigation => _navigationService;
+    public string AppVersion => _updateManager?.CurrentVersion?.ToString()
+        ?? System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)
+        ?? "dev";
+
+    public MainWindowViewModel(
+        NavigationService navigationService,
+        AuthService authService,
+        ThemeService themeService,
+        UpdateManager? updateManager)
     {
         _navigationService = navigationService;
         _authService = authService;
         _themeService = themeService;
+        _updateManager = updateManager;
         _isDarkMode = themeService.IsDarkMode;
     }
 
@@ -46,7 +62,7 @@ public partial class MainWindowViewModel : ObservableObject
             if (await _authService.TrySilentLoginAsync())
             {
                 AuthStatusMessage = $"Welcome back, {_authService.UserDisplayName ?? "User"}";
-                await Task.Delay(600); // brief pause so the user sees the greeting
+                await Task.Delay(600);
 
                 UserName = _authService.UserDisplayName ?? "User";
                 IsAuthenticated = true;
@@ -62,6 +78,50 @@ public partial class MainWindowViewModel : ObservableObject
         {
             IsCheckingAuth = false;
         }
+
+        // Check for updates after auth resolves (fire and forget)
+        _ = CheckForUpdatesAsync();
+    }
+
+    /// <summary>
+    /// Checks the network share for a newer version. Downloads in background if found.
+    /// </summary>
+    private async Task CheckForUpdatesAsync()
+    {
+        if (_updateManager is null) return;
+
+        try
+        {
+            var updateInfo = await _updateManager.CheckForUpdatesAsync();
+            if (updateInfo is null) return;
+
+            _pendingUpdate = updateInfo;
+            UpdateVersion = updateInfo.TargetFullRelease.Version.ToString();
+            IsDownloadingUpdate = true;
+
+            await _updateManager.DownloadUpdatesAsync(updateInfo);
+
+            IsDownloadingUpdate = false;
+            IsUpdateAvailable = true;
+        }
+        catch
+        {
+            // Update check failed silently — network share unavailable, etc.
+            IsDownloadingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    private void ApplyUpdate()
+    {
+        if (_updateManager is null || _pendingUpdate is null) return;
+        _updateManager.ApplyUpdatesAndRestart(_pendingUpdate);
+    }
+
+    [RelayCommand]
+    private void DismissUpdate()
+    {
+        IsUpdateAvailable = false;
     }
 
     [RelayCommand]

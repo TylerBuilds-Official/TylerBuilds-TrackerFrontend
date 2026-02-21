@@ -1,12 +1,23 @@
+using System.IO;
 using System.Windows;
 using JobTrackerFrontend.Services;
 using JobTrackerFrontend.ViewModels;
 using JobTrackerFrontend.Views;
+using Velopack;
 
 namespace JobTrackerFrontend;
 
 public partial class App : Application
 {
+    [STAThread]
+    private static void Main(string[] args)
+    {
+        VelopackApp.Build().Run();
+        var app = new App();
+        app.InitializeComponent();
+        app.Run();
+    }
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -17,6 +28,12 @@ public partial class App : Application
         var authService = new AuthService();
         var apiClient = new ApiClient(authService);
         var navigationService = new NavigationService();
+
+        // Update manager
+        UpdateManager? updateManager = null;
+        var feedPath = AppConfig.UpdateFeedPath;
+        if (!string.IsNullOrEmpty(feedPath) && Directory.Exists(feedPath))
+            updateManager = new UpdateManager(feedPath);
 
         // ViewModels
         var dashboardVm = new DashboardViewModel(apiClient, themeService);
@@ -35,7 +52,7 @@ public partial class App : Application
         navigationService.Register("Time Clock", () => new TimeClockView { DataContext = timeClockVm });
 
         // Main Window
-        var mainVm = new MainWindowViewModel(navigationService, authService, themeService);
+        var mainVm = new MainWindowViewModel(navigationService, authService, themeService, updateManager);
         var mainWindow = new MainWindow { DataContext = mainVm };
         mainWindow.Show();
 

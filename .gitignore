@@ -1,3 +1,9 @@
 ﻿.idea
 crud_implementation_plan.md
 project_ref.md
+
+# Build output
+bin/
+obj/
+publish/
+Releases/

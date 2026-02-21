@@ -67,6 +67,10 @@ public class AuthService
 
     public async Task<string> GetAccessTokenAsync()
     {
+        // Return cached token if still valid (with 5-min buffer)
+        if (_cachedAuth != null && _cachedAuth.ExpiresOn > DateTimeOffset.UtcNow.AddMinutes(5))
+            return _cachedAuth.AccessToken;
+
         var accounts = await _msalClient.GetAccountsAsync();
         var account = accounts.FirstOrDefault();
 
