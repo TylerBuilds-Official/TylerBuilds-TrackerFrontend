@@ -1,0 +1,172 @@
+<UserControl x:Class="JobTrackerFrontend.Views.ResearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:JobTrackerFrontend.ViewModels"
+             d:DataContext="{d:DesignInstance vm:ResearchViewModel}"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Loaded="OnLoaded">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Loading -->
+        <ProgressBar Grid.Row="0"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     IsIndeterminate="True"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                     Height="2" Margin="0,0,0,4"
+                     Background="Transparent" BorderThickness="0" />
+
+        <!-- Header Buttons -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Right"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Content="Promote to Client"
+                        Command="{Binding PromoteLeadCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedLead, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Delete"
+                        Command="{Binding DeleteLeadCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedLead, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="Edit"
+                        Command="{Binding EditLeadCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Margin="0,0,12,0"
+                        IsEnabled="{Binding SelectedLead, Converter={StaticResource NotNullToBoolConverter}}" />
+                <Button Content="New Lead"
+                        Command="{Binding NewLeadCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Filters -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <ComboBox Width="140"
+                      md:HintAssist.Hint="Status"
+                      ItemsSource="{Binding StatusOptions}"
+                      SelectedItem="{Binding StatusFilter}"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13" />
+
+            <ComboBox Width="120"
+                      md:HintAssist.Hint="Would Pay"
+                      ItemsSource="{Binding WouldPayOptions}"
+                      SelectedItem="{Binding WouldPayFilter}"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13"
+                      Margin="8,0,0,0" />
+
+            <ComboBox Width="180"
+                      md:HintAssist.Hint="Theme"
+                      ItemsSource="{Binding Themes}"
+                      SelectedItem="{Binding ThemeFilter}"
+                      DisplayMemberPath="Name"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      Padding="8,4" FontSize="13"
+                      Margin="8,0,0,0" />
+
+            <Button Command="{Binding ManageThemesCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    ToolTip="Manage Themes"
+                    Margin="12,0,0,0" Padding="8,4">
+                <md:PackIcon Kind="CogOutline" Width="18" Height="18" />
+            </Button>
+        </StackPanel>
+
+        <!-- Research Leads Grid -->
+        <DataGrid Grid.Row="3"
+                  ItemsSource="{Binding Leads}"
+                  SelectedItem="{Binding SelectedLead}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  SelectionMode="Single"
+                  AlternationCount="2"
+                  AlternatingRowBackground="#0A455A64"
+                  MouseDoubleClick="OnRowDoubleClick">
+            <DataGrid.ContextMenu>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Edit" Command="{Binding EditLeadCommand}" />
+                    <MenuItem Header="Promote to Client" Command="{Binding PromoteLeadCommand}" />
+                    <Separator />
+                    <MenuItem Header="Delete" Command="{Binding DeleteLeadCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Business" Binding="{Binding BusinessName}" Width="2*" />
+                <DataGridTextColumn Header="Theme" Binding="{Binding ThemeName}" Width="1.2*" />
+                <DataGridTextColumn Header="Interest" Binding="{Binding InterestLevel}" Width="0.7*" />
+                <DataGridTemplateColumn Header="Would Pay" Width="0.9*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="8"
+                                    Padding="8,2" Margin="0,2"
+                                    HorizontalAlignment="Left">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#E0E0E0" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding WouldPay}" Value="2">
+                                                <Setter Property="Background" Value="#C8E6C9" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding WouldPay}" Value="1">
+                                                <Setter Property="Background" Value="#FFF9C4" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="11" FontWeight="Medium">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="No" />
+                                            <Setter Property="Foreground" Value="#757575" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding WouldPay}" Value="2">
+                                                    <Setter Property="Text" Value="Yes" />
+                                                    <Setter Property="Foreground" Value="#2E7D32" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding WouldPay}" Value="1">
+                                                    <Setter Property="Text" Value="Maybe" />
+                                                    <Setter Property="Foreground" Value="#F57F17" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Status" Width="1.1*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="8"
+                                    Background="{Binding StatusDisplay, Converter={StaticResource StatusToBrushConverter}}"
+                                    Padding="8,2" Margin="0,2"
+                                    HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding StatusDisplay}"
+                                           Foreground="{Binding StatusDisplay, Converter={StaticResource StatusToForegroundConverter}}"
+                                           FontSize="11" FontWeight="Medium" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Contacted" Binding="{Binding DateContacted, StringFormat=d}" Width="*" />
+                <DataGridTextColumn Header="Follow-Up" Binding="{Binding FollowUpDate, StringFormat=d}" Width="*" />
+                <DataGridTextColumn Header="Contact" Binding="{Binding ContactDisplay}" Width="1.2*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

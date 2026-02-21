@@ -3,6 +3,7 @@ using System.Windows;
 using JobTrackerFrontend.Services;
 using JobTrackerFrontend.ViewModels;
 using JobTrackerFrontend.Views;
+
 using Velopack;
 
 namespace JobTrackerFrontend;
@@ -42,6 +43,7 @@ public partial class App : Application
         var invoicesVm = new InvoicesViewModel(apiClient);
         var expensesVm = new ExpensesViewModel(apiClient);
         var timeClockVm = new TimeClockViewModel(apiClient);
+        var researchVm = new ResearchViewModel(apiClient);
 
         // Register navigation routes
         navigationService.Register("Dashboard", () => new DashboardView { DataContext = dashboardVm });
@@ -50,6 +52,7 @@ public partial class App : Application
         navigationService.Register("Invoices", () => new InvoicesView { DataContext = invoicesVm });
         navigationService.Register("Expenses", () => new ExpensesView { DataContext = expensesVm });
         navigationService.Register("Time Clock", () => new TimeClockView { DataContext = timeClockVm });
+        navigationService.Register("Research", () => new ResearchView { DataContext = researchVm });
 
         // Main Window
         var mainVm = new MainWindowViewModel(navigationService, authService, themeService, updateManager);

@@ -323,6 +323,33 @@
                                 </StackPanel>
                             </Button>
                         </Border>
+                        
+                        <!-- Research -->
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Research" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Research" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Research"
+                                    Style="{StaticResource NavButtonStyle}"
+                                    ToolTip="Research">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="Magnify" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Research"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
 
                         <!-- Time Clock -->
                         <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
@@ -350,6 +377,7 @@
                                 </StackPanel>
                             </Button>
                         </Border>
+
                     </StackPanel>
                 </DockPanel>
             </Border>
