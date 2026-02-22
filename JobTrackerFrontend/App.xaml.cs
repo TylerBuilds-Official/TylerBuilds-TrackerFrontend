@@ -44,6 +44,7 @@ public partial class App : Application
         var expensesVm = new ExpensesViewModel(apiClient);
         var timeClockVm = new TimeClockViewModel(apiClient);
         var researchVm = new ResearchViewModel(apiClient);
+        var notesVm = new NotesViewModel(apiClient);
 
         // Register navigation routes
         navigationService.Register("Dashboard", () => new DashboardView { DataContext = dashboardVm });
@@ -51,8 +52,9 @@ public partial class App : Application
         navigationService.Register("Jobs", () => new JobsView { DataContext = jobsVm });
         navigationService.Register("Invoices", () => new InvoicesView { DataContext = invoicesVm });
         navigationService.Register("Expenses", () => new ExpensesView { DataContext = expensesVm });
-        navigationService.Register("Time Clock", () => new TimeClockView { DataContext = timeClockVm });
         navigationService.Register("Research", () => new ResearchView { DataContext = researchVm });
+        navigationService.Register("Notes", () => new NotesView { DataContext = notesVm });
+        navigationService.Register("Time Clock", () => new TimeClockView { DataContext = timeClockVm });
 
         // Main Window
         var mainVm = new MainWindowViewModel(navigationService, authService, themeService, updateManager);

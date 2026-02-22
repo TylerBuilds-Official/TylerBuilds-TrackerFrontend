@@ -18,7 +18,7 @@ public partial class ExpenseFormViewModel : ObservableObject
     [ObservableProperty] private JobModel? _selectedJob;
     [ObservableProperty] private string? _vendor;
     [ObservableProperty] private string? _description;
-    [ObservableProperty] private decimal? _amount;
+    [ObservableProperty] private string _amountText = "";
     [ObservableProperty] private DateTime? _expenseDate = DateTime.Today;
     [ObservableProperty] private bool _isReimbursable;
     [ObservableProperty] private string? _receiptFilePath;
@@ -67,7 +67,7 @@ public partial class ExpenseFormViewModel : ObservableObject
 
         Vendor = expense.Vendor;
         Description = expense.Description;
-        Amount = expense.Amount;
+        AmountText = expense.Amount.ToString("0.00");
         ExpenseDate = expense.ExpenseDate;
         IsReimbursable = expense.IsReimbursable;
         ReceiptFilePath = expense.ReceiptFilePath;
@@ -114,9 +114,9 @@ public partial class ExpenseFormViewModel : ObservableObject
             return;
         }
 
-        if (!Amount.HasValue || Amount.Value <= 0)
+        if (!decimal.TryParse(AmountText, out var parsedAmount) || parsedAmount <= 0)
         {
-            ErrorMessage = "Amount must be greater than zero.";
+            ErrorMessage = "Amount must be a valid number greater than zero.";
             return;
         }
 
@@ -139,7 +139,7 @@ public partial class ExpenseFormViewModel : ObservableObject
                     CategoryId = SelectedCategory.Id,
                     Vendor = Vendor!.Trim(),
                     Description = Description?.Trim(),
-                    Amount = Amount.Value,
+                    Amount = parsedAmount,
                     ExpenseDate = ExpenseDate.Value,
                     IsReimbursable = IsReimbursable,
                     ReceiptFilePath = ReceiptFilePath?.Trim(),
@@ -155,7 +155,7 @@ public partial class ExpenseFormViewModel : ObservableObject
                     CategoryId = SelectedCategory.Id,
                     Vendor = Vendor!.Trim(),
                     Description = Description?.Trim(),
-                    Amount = Amount.Value,
+                    Amount = parsedAmount,
                     ExpenseDate = ExpenseDate.Value,
                     IsReimbursable = IsReimbursable,
                     ReceiptFilePath = ReceiptFilePath?.Trim(),

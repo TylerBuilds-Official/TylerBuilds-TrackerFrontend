@@ -351,6 +351,33 @@
                             </Button>
                         </Border>
 
+                        <!-- Notes -->
+                        <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
+                            <Border.Background>
+                                <MultiBinding Converter="{StaticResource ActiveNavBrushConverter}">
+                                    <Binding Source="Notes" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{StaticResource ActiveNavBorderConverter}">
+                                    <Binding Source="Notes" />
+                                    <Binding Path="SelectedNavItem" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
+                            <Button Command="{Binding NavigateToCommand}"
+                                    CommandParameter="Notes"
+                                    Style="{StaticResource NavButtonStyle}"
+                                    ToolTip="Notes">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <md:PackIcon Kind="NoteTextOutline" Width="18" Height="18" Margin="2,0,10,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Notes"
+                                               VerticalAlignment="Center"
+                                               Visibility="{Binding IsNavExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+
                         <!-- Time Clock -->
                         <Border CornerRadius="2" Margin="8,2" BorderThickness="0">
                             <Border.Background>

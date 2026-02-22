@@ -64,7 +64,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Grid.Column="0"
-                         Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                         Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                          md:HintAssist.Hint="Amount *"
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
                          Margin="0,0,8,0" />
