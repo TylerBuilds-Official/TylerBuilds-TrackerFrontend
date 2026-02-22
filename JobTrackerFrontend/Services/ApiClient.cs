@@ -30,8 +30,7 @@ public class ApiClient
         _httpClient = new HttpClient(handler)
         {
             // Adjust to 'DevApiBaseUrl' during development if making changes to the API.
-            // FIXME 
-            BaseAddress = new Uri(AppConfig.DevApiBaseUrl),
+            BaseAddress = new Uri(AppConfig.ApiBaseUrl),
             Timeout     = TimeSpan.FromSeconds(15)
         };
     }
